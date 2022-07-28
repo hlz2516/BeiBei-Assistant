@@ -2,7 +2,11 @@
 node_modules
 /dist
 /public/config/mysql_config.js
-
+/public/css
+/public/fonts
+/public/js
+/public/favicon.ico
+/public/index.html
 
 # local env files
 .env.local
