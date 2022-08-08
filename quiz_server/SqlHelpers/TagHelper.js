@@ -73,11 +73,10 @@ async function getAll() {
   await new Promise((resolve)=>{
     db.query(sqlStr, select)
     .on('end', function() {
-      // all rows have been received
       resolve()
     });
   })
-//   console.log('外部执行');
+
   return res;
 }
 

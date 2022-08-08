@@ -174,10 +174,31 @@ async function selectById(id) {
   return res
 }
 
+async function deleteById(id) {  
+  let res = false
+
+  let sqlStr = 'delete from quiz where id = ?'
+  await new Promise((resolve)=>{
+    db.query(sqlStr,id,(err)=>{
+      if (err) {
+        console.error(err)
+        return 
+      }
+      res = true
+    })
+    .on('end',()=>{
+      resolve()
+    })
+  })
+
+  return res
+}
+
 module.exports = {
   insert,
   selectByTag,
   updateLevel,
   update,
-  selectById
+  selectById,
+  deleteById
 };

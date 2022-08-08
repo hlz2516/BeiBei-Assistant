@@ -1,6 +1,6 @@
 <template>
   <el-container id="container">
-    <el-aside class="aside">
+    <el-aside id="aside">
       <div class="search-container">
         <input type="text" id="search" v-model="keyWord" placeholder="题号"
         @keyup.enter="showResult"
@@ -55,16 +55,21 @@
       </div>
       <div class="tags-container">
         <label for="">重要程度</label>
-        <input type="radio" name="imp" value="important" v-model="importance">重要
-        <input type="radio" name="imp" value="understand" v-model="importance">理解
-        <input type="radio" name="imp" value="know" v-model="importance">了解
-        <input type="radio" name="imp" value="unknown" v-model="importance">未知
+        <input type="radio" id="ipt" name="imp" value="important" v-model="importance">
+        <label for="ipt">重要</label>
+        <input type="radio" id="und" name="imp" value="understand" v-model="importance">
+        <label for="und">理解</label>
+        <input type="radio" id="kno" name="imp" value="know" v-model="importance">
+        <label for="kno">了解</label>
+        <input type="radio" id="unk" name="imp" value="unknown" v-model="importance">
+        <label for="unk">未知</label>
       </div>
       <div class="func">
         <!-- 点击提交时，保留原来的数据不变，直到用户点击清空，每次清空时，会生成一个新id；清空前id不变 -->
         <button @click="submit">提交</button>
         <button @click="clear">清空</button>
         <button @click="submitAndClear">提交并清空</button>
+        <button @click="remove">删除</button>
         <button @click="back">返回主页</button>
         <div id="bingo-icon" :class="bingoIconList" ref="bingoIcon">
           <i :class="`iconfont ${icon}`"></i>
@@ -135,7 +140,9 @@ export default {
           if (resp.status >= 200 && resp.status < 300) {
             // this.$refs.bingoIcon.classList.add("commited", "succeed");
             this.icon = "icon-duigou"
-            this.bingoIconList = "commited succeed"
+            setTimeout(() => {
+              this.bingoIconList = "commited succeed"
+            }, 100);
             this.id = resp.data
           } else {
             return new Promise((resolve, reject) => {
@@ -147,7 +154,9 @@ export default {
           console.error(err);
           this.icon = "icon-cuo";
           // this.$refs.bingoIcon.classList.add("commited", "failed");
-          this.bingoIconList = "commited failed"
+          setTimeout(() => {
+            this.bingoIconList = "commited failed"
+          }, 100);
         });
     },
     clear() {
@@ -176,7 +185,9 @@ export default {
             this.id = resp.data
             this.icon = "icon-duigou";
             // this.$refs.bingoIcon.classList.add("commited-clear", "succeed");
-            this.bingoIconList = "commited-clear succeed"
+            setTimeout(() => {
+              this.bingoIconList = "commited-clear succeed"
+            }, 100);
             this.clear();
           } else {
             return new Promise((resolve, reject) => {
@@ -188,8 +199,31 @@ export default {
           console.error(err);
           this.icon = "icon-cuo";
           // this.$refs.bingoIcon.classList.add("commited-clear", "failed");
-          this.bingoIconList = "commited-clear succeed"
+          
+          setTimeout(() => {
+            this.bingoIconList = "commited-clear succeed"
+          }, 100);
         });
+    },
+    remove(){
+      this.$addr.get('/api/quizrem?id=' + this.id)
+      .then((resp)=>{
+        if (resp.status === 200 && resp.data === "OK") {
+          if (resp.data === "OK") {
+            this.icon = "icon-duigou";
+            setTimeout(() => {
+              this.bingoIconList = "remove succeed"
+            }, 100);
+            this.clear()
+          }
+          else{
+            this.icon = "icon-cuo";
+            setTimeout(() => {
+              this.bingoIconList = "remove failed"
+            }, 100);
+          }
+        }
+      })
     },
     back() {
       this.$router.back();
@@ -272,8 +306,9 @@ export default {
     let container = this.$refs.contentEditor.$el.querySelector(".ql-container");
     container.style.height = "300px";
     //给动画元素绑定动画完成的触发事件
-    this.$refs.bingoIcon.addEventListener("animationend", function () {
-      this.bingoIconList = "";
+    this.$refs.bingoIcon.addEventListener("animationend",()=> {
+      this.bingoIconList = ''
+      this.icon = ''
     });
   },
   beforeDestroy() {
@@ -284,14 +319,16 @@ export default {
 
 <style scoped>
 #container {
-  width: 1300px;
-  height: 650px;
+  width: 90%;
+  height: 90%;
   border: 1px solid black;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
+
+
 
 .post-edit {
   width: 100%;
@@ -396,24 +433,31 @@ export default {
 }
 
 .commited {
-  left: 168px;
+  left: 150px;
   top: 50%;
   /* color: green; */
   transform: translate(0, -50%);
   animation-name: an-commited;
   animation-duration: 1.5s;
   animation-timing-function: ease-in-out;
-  animation-play-state: running;
 }
 
 .commited-clear {
-  left: 628px;
+  left: 555px;
   top: 50%;
   transform: translate(0, -50%);
   animation-name: an-commited;
   animation-duration: 1.5s;
   animation-timing-function: ease-in-out;
-  animation-play-state: running;
+}
+
+.remove{
+  left: 748px;
+  top: 50%;
+  transform: translate(0, -50%);
+  animation-name: an-commited;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in-out;
 }
 
 @keyframes an-commited {
@@ -436,7 +480,7 @@ export default {
   line-height: 30px;
 }
 
-.aside {
+#aside {
   border: 1px solid black;
   box-sizing: border-box;
   padding: 20px;

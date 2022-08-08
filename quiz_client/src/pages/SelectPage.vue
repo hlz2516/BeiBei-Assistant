@@ -59,6 +59,7 @@
     </div>
     <div class="func">
       <button @click="start">开始</button>
+      <button @click="back">返回主页</button>
     </div>
   </div>
 </template>
@@ -70,12 +71,7 @@ export default {
   name: "SelectPage",
   data() {
     return {
-      tags: [
-        {
-          name: "html",
-          choose: false,
-        },
-      ],
+      tags: [],
       choosedTag: "",
       number: 0,
     };
@@ -86,7 +82,6 @@ export default {
   methods: {
     start() {
       if (this.choosedTag.length < 1) {
-        alert("请选择一个标签再开始!");
         return;
       }
 
@@ -122,6 +117,9 @@ export default {
         this.choosedTag = "";
       }
     },
+    back(){
+      this.$router.replace('/index')
+    }
   },
   beforeCreate() {
     this.$addr
@@ -153,18 +151,21 @@ export default {
 
 <style scoped>
 #container {
-  width: 1000px;
-  height: 650px;
+  width: 90%;
+  height: 90%;
   border: 1px solid black;
+  padding-top: 20px;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
 }
 
 .tags {
+  flex: 4;
   width: 96%;
-  height: 250px;
   border: 1px solid black;
   margin: 20px auto;
   display: flex;
@@ -188,8 +189,8 @@ export default {
 }
 
 .number {
+  flex: 4;
   width: 96%;
-  height: 250px;
   border: 1px solid black;
   margin: 20px auto;
   display: flex;
@@ -226,22 +227,26 @@ export default {
 }
 
 .func {
+  flex: 2;
   width: 96%;
-  height: 60px;
-  border: 1px solid black;
-  margin: 20px auto;
+  /* border: 1px solid black; */
+  margin: 30px auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content:space-around;
+  align-items:stretch;
 }
 
 .func > button {
-  width: 100%;
-  height: 100%;
+  height: 40px;
 }
 
 .mytag {
   width: 100px;
   float: left;
   margin-right: 20px;
+  margin-bottom: 5px;
 }
 
 .mytag:hover {

@@ -50,13 +50,13 @@ export default {
         return state.quizs[0];
       },
       hasDone: (state) => state.quizCount - state.quizs.length,
-    })
+    }),
   },
   watch: {
     hasDone(newVal) {
       if (newVal === this.quizCount) {
         alert("您已完成本轮复习！");
-        this.$router.back()
+        this.$router.back();
       }
     },
   },
@@ -65,20 +65,20 @@ export default {
       this.show = !this.show;
     },
     toFamiliar() {
-      this.commitChgLevel('familiar')
+      this.commitChgLevel("familiar");
     },
     toUnderstand() {
-      this.commitChgLevel('understand')
+      this.commitChgLevel("understand");
     },
     toHard() {
-        this.commitChgLevel('hard')
+      this.commitChgLevel("hard");
     },
     toRecircle() {
-        this.show = false;
-        this.$store.commit("quizRecircle");
+      this.show = false;
+      this.$store.commit("quizRecircle");
     },
     cancel() {
-        this.$router.back()
+      this.$router.back();
     },
     commitChgLevel(level) {
       this.$addr
@@ -102,63 +102,66 @@ export default {
 
 <style scoped>
 #quiz-container {
-  width: 1000px;
-  height: 650px;
+  width: 96%;
+  height: 96%;
   border: 1px solid black;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
   width: 100%;
+  /* flex: 2; */
+  height: fit-content;
   border-bottom: 1px solid black;
-  height: auto;
-  min-height: 100px;
+  min-height: 60px;
   box-sizing: border-box;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@media screen and (min-width: 380px) and (max-width: 600px) {
+  .title-info {
+    font-size: 6px;
+  }
 }
 
 .title-info {
+  flex: 2;
   width: 100%;
-  height: 30px;
+  height: fit-content;
   border-bottom: 1px solid #e8dddd;
   box-sizing: border-box;
+  display: flex;
 }
 
 #info-id {
-  line-height: 30px;
-  float: left;
+  flex: 2;
+  text-align: left;
   margin-left: 10px;
 }
 
 #info-level {
-  line-height: 30px;
-  float: left;
-  margin-left: 120px;
+  flex: 3;
 }
 
 #info-imp {
-  line-height: 30px;
-  float: left;
-  margin-left: 120px;
+  flex: 3;
 }
 
 #info-quizs-done {
-  line-height: 30px;
-  float: right;
-  margin-right: 30px;
+  flex: 2;
 }
 
 .question {
+  flex: 8;
   width: 100%;
-  position: absolute;
-  margin: auto;
-  top: 30px;
-  bottom: 0;
   padding: 4px 10px;
-  /* border: 1px solid green; */
   box-sizing: border-box;
   text-align: left;
   font-size: 18px;
@@ -170,7 +173,7 @@ export default {
 
 .content {
   width: 100%;
-  height: 450px;
+  flex: 8;
   box-sizing: border-box;
   border: 1px solid lightblue;
   overflow: auto;
@@ -210,10 +213,8 @@ export default {
 
 .footer {
   width: 100%;
-  height: 60px;
+  flex: 2;
   border: 1px solid khaki;
-  position: fixed;
-  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: space-around;

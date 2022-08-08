@@ -75,7 +75,7 @@ router.get('/quizs',async (req,res,next)=>{
 })
 
 router.get('/quiz',async (req,res,next)=>{
-  let id = req.query.id
+  const id = req.query.id
   try {
     data = await quizHelper.selectById(id)
     res.status(200).json(data[0]);
@@ -85,7 +85,7 @@ router.get('/quiz',async (req,res,next)=>{
 })
 
 router.get('/chglevel',(req,res,next)=>{
-  let params = req.query
+  const params = req.query
   try {
     quizHelper.updateLevel(params)
     res.status(200).send('OK')
@@ -94,9 +94,19 @@ router.get('/chglevel',(req,res,next)=>{
   }
 })
 
-router.get('/test#abc',(req,res,next)=>{
-  console.log(req.query);
-  res.send('C#?< >$=/+?&')
+router.get('/quizrem',async (req,res,next)=>{
+  const id = req.query.id;
+  try {
+    const hasRem = await quizHelper.deleteById(id)
+    if (hasRem) {
+      res.send('OK')
+    }else{
+      res.send('delete err')
+    }
+  } catch (e) {
+    console.error(e);
+  }
 })
+
 
 module.exports = router;
