@@ -174,6 +174,26 @@ async function selectById(id) {
   return res
 }
 
+async function selectByKeyword(keyWord) {  
+  let res = []
+
+  let sqlStr = `select * from quiz where question like "%${keyWord}%" or answer like "%${keyWord}%"`
+  await new Promise((resolve)=>{
+    db.query(sqlStr,(err,results)=>{
+      if (err) {
+        console.error(err)
+        return
+      }
+      res = res.concat(results)
+    })
+    .on('end',()=>{
+      resolve()
+    })
+  })
+
+  return res
+}
+
 async function deleteById(id) {  
   let res = false
 
@@ -200,5 +220,6 @@ module.exports = {
   updateLevel,
   update,
   selectById,
+  selectByKeyword,
   deleteById
 };

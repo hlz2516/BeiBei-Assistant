@@ -16,14 +16,12 @@ const request =  axios.create({
 
 request.interceptors.request.use(req=>{
     // console.log(req);
-    //对于发送的每个数据项都要进行编码处理
     
     return req
 })
 
 request.interceptors.response.use(res=>{
     // console.log(res);
-    //对于接收的每个数据项都要进行解码处理
 
     return res
 })

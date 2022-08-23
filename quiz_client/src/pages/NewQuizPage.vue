@@ -2,12 +2,25 @@
   <el-container id="container">
     <el-aside id="aside">
       <div class="search-container">
-        <input type="text" id="search" v-model="keyWord" placeholder="题号"
-        @keyup.enter="showResult"
-        @blur="showResult"
-        >
+        <input
+          type="text"
+          id="search"
+          v-model="keyWord"
+          placeholder="题号/关键词"
+          @keyup.enter="getQuizList"
+          @blur="getQuizList"
+        />
       </div>
-      <div class="result-container"></div>
+      <div class="result-container">
+        <div
+          v-for="quiz in quizList"
+          :key="quiz.id"
+          class="quiz-info"
+          @click="showQuizInfo(quiz)"
+        >
+          {{ quiz.id }}.{{ quiz.title }}
+        </div>
+      </div>
     </el-aside>
     <el-main style="overflow: hidden">
       <div class="title">
@@ -55,13 +68,37 @@
       </div>
       <div class="tags-container">
         <label for="">重要程度</label>
-        <input type="radio" id="ipt" name="imp" value="important" v-model="importance">
+        <input
+          type="radio"
+          id="ipt"
+          name="imp"
+          value="important"
+          v-model="importance"
+        />
         <label for="ipt">重要</label>
-        <input type="radio" id="und" name="imp" value="understand" v-model="importance">
+        <input
+          type="radio"
+          id="und"
+          name="imp"
+          value="understand"
+          v-model="importance"
+        />
         <label for="und">理解</label>
-        <input type="radio" id="kno" name="imp" value="know" v-model="importance">
+        <input
+          type="radio"
+          id="kno"
+          name="imp"
+          value="know"
+          v-model="importance"
+        />
         <label for="kno">了解</label>
-        <input type="radio" id="unk" name="imp" value="unknown" v-model="importance">
+        <input
+          type="radio"
+          id="unk"
+          name="imp"
+          value="unknown"
+          v-model="importance"
+        />
         <label for="unk">未知</label>
       </div>
       <div class="func">
@@ -81,7 +118,7 @@
 
 <script>
 import MyQuillEditor from "../components/MyQuillEditor.vue";
-import time from 'time-formater';
+import time from "time-formater";
 
 import "../assets/iconfonts/iconfont.css";
 
@@ -96,34 +133,35 @@ export default {
         {
           name: "tag1",
           choose: false,
-        }
+        },
       ],
       choosedTags: [],
       content: "",
       icon: "",
       inputVisible: false,
       inputValue: "",
-      importance:'unknown',
-      bingoIconList:'',
-      keyWord:''
+      importance: "unknown",
+      bingoIconList: "",
+      keyWord: "",
+      quizList: [],
     };
   },
   components: {
     MyQuillEditor,
   },
-  
+
   computed: {
     transInfo() {
       return {
         id: this.id,
-        question: (this.title),
-        answer: (this.content),
+        question: this.title,
+        answer: this.content,
         tags: this.choosedTags,
-        importance:this.importance,
-        level:'unknown',
-        level_time:''
+        importance: this.importance,
+        level: "unknown",
+        level_time: "",
       };
-    }
+    },
   },
   methods: {
     submit() {
@@ -132,18 +170,18 @@ export default {
       if (this.choosedTags.length < 1) {
         return;
       }
-      this.transInfo.level_time = time().format("YYYY-MM-DD HH:mm:ss")
+      this.transInfo.level_time = time().format("YYYY-MM-DD HH:mm:ss");
 
       this.$addr
         .post("/api/new", this.transInfo)
         .then((resp) => {
           if (resp.status >= 200 && resp.status < 300) {
             // this.$refs.bingoIcon.classList.add("commited", "succeed");
-            this.icon = "icon-duigou"
+            this.icon = "icon-duigou";
             setTimeout(() => {
-              this.bingoIconList = "commited succeed"
+              this.bingoIconList = "commited succeed";
             }, 100);
-            this.id = resp.data
+            this.id = resp.data;
           } else {
             return new Promise((resolve, reject) => {
               reject(`网络错误,code:${resp.status},message:${resp.statusText}`);
@@ -155,7 +193,7 @@ export default {
           this.icon = "icon-cuo";
           // this.$refs.bingoIcon.classList.add("commited", "failed");
           setTimeout(() => {
-            this.bingoIconList = "commited failed"
+            this.bingoIconList = "commited failed";
           }, 100);
         });
     },
@@ -166,27 +204,27 @@ export default {
       //重置choosedTags
       this.choosedTags = [];
       //清空选中标签
-      this.tags.forEach(tag=>{
-        tag.choose = false
-      })
+      this.tags.forEach((tag) => {
+        tag.choose = false;
+      });
       //重要程度重置为未知
-      this.importance = 'unknown'
+      this.importance = "unknown";
     },
     submitAndClear() {
       if (this.choosedTags.length < 1) {
         return;
       }
-      this.transInfo.level_time = time().format("YYYY-MM-DD HH:mm:ss")
+      this.transInfo.level_time = time().format("YYYY-MM-DD HH:mm:ss");
 
       this.$addr
         .post("/api/new", this.transInfo)
         .then((resp) => {
           if (resp.status >= 200 && resp.status < 300) {
-            this.id = resp.data
+            this.id = resp.data;
             this.icon = "icon-duigou";
             // this.$refs.bingoIcon.classList.add("commited-clear", "succeed");
             setTimeout(() => {
-              this.bingoIconList = "commited-clear succeed"
+              this.bingoIconList = "commited-clear succeed";
             }, 100);
             this.clear();
           } else {
@@ -199,31 +237,29 @@ export default {
           console.error(err);
           this.icon = "icon-cuo";
           // this.$refs.bingoIcon.classList.add("commited-clear", "failed");
-          
+
           setTimeout(() => {
-            this.bingoIconList = "commited-clear succeed"
+            this.bingoIconList = "commited-clear succeed";
           }, 100);
         });
     },
-    remove(){
-      this.$addr.get('/api/quizrem?id=' + this.id)
-      .then((resp)=>{
+    remove() {
+      this.$addr.get("/api/quizrem?id=" + this.id).then((resp) => {
         if (resp.status === 200 && resp.data === "OK") {
           if (resp.data === "OK") {
             this.icon = "icon-duigou";
             setTimeout(() => {
-              this.bingoIconList = "remove succeed"
+              this.bingoIconList = "remove succeed";
             }, 100);
-            this.clear()
-          }
-          else{
+            this.clear();
+          } else {
             this.icon = "icon-cuo";
             setTimeout(() => {
-              this.bingoIconList = "remove failed"
+              this.bingoIconList = "remove failed";
             }, 100);
           }
         }
-      })
+      });
     },
     back() {
       this.$router.back();
@@ -258,41 +294,67 @@ export default {
       this.inputVisible = false;
       this.inputValue = "";
     },
-    showResult(){
-      this.$addr.get('/api/quiz',{
-        params:{
-          id:this.keyWord
-        }
-      })
-      .then((resp)=>{
-        if (resp.status === 200) {
-          // console.log(resp.data);
-          this.id = resp.data.id
-          this.title = resp.data.question
-          this.content = resp.data.answer
-          this.importance = resp.data.importance
-          //标签处理
-          this.choosedTags = resp.data.tags.split('|')
-          for (let i = 0; i < this.choosedTags.length; i++) {
-            this.choosedTags[i] = this.choosedTags[i]
+    getQuizList() {
+      this.$addr
+        .get("/api/quiz", {
+          params: {
+            keyword: this.keyWord,
+          },
+        })
+        .then((resp) => {
+          if (resp.status === 200) {
+            // console.log(resp.data);
+            // this.id = resp.data.id
+            // this.title = resp.data.question
+            // this.content = resp.data.answer
+            // this.importance = resp.data.importance
+            // //标签处理
+            // this.choosedTags = resp.data.tags.split('|')
+            // for (let i = 0; i < this.choosedTags.length; i++) {
+            //   this.choosedTags[i] = this.choosedTags[i]
+            // }
+            // this.tags.forEach((elem)=>{
+            //   if (this.choosedTags.indexOf(elem.name) > -1) {
+            //     elem.choose = true
+            //   }
+            // })
+            this.quizList = [];
+            Array.from(resp.data).forEach((quiz) => {
+              this.quizList.push({
+                id: quiz.id,
+                title: quiz.question,
+                content: quiz.answer,
+                importance: quiz.importance,
+                tags: quiz.tags,
+              });
+            });
           }
-          this.tags.forEach((elem)=>{
-            if (this.choosedTags.indexOf(elem.name) > -1) {
-              elem.choose = true
-            }
-          })
+        });
+    },
+    showQuizInfo(quiz) {
+      this.id = quiz.id;
+      this.title = quiz.title;
+      this.content = quiz.content;
+      this.importance = quiz.importance;
+      //标签处理
+      this.choosedTags = quiz.tags.split("|");
+      this.tags.forEach((elem) => {
+        if (this.choosedTags.indexOf(elem.name) > -1) {
+          elem.choose = true;
+        }else{
+          elem.choose = false;
         }
-      })
-    }
+      });
+    },
   },
   created() {
     this.$addr
       .get("/api/alltags")
       .then((resp) => {
         if (resp.status >= 200 && resp.status < 300) {
-          this.tags = resp.data.map(val=>{
-            return {'name':val,'choose':false}
-          })
+          this.tags = resp.data.map((val) => {
+            return { name: val, choose: false };
+          });
         } else
           return new Promise((_, reject) => {
             reject(`网络错误,code:${resp.status},message:${resp.statusText}`);
@@ -306,14 +368,12 @@ export default {
     let container = this.$refs.contentEditor.$el.querySelector(".ql-container");
     container.style.height = "300px";
     //给动画元素绑定动画完成的触发事件
-    this.$refs.bingoIcon.addEventListener("animationend",()=> {
-      this.bingoIconList = ''
-      this.icon = ''
+    this.$refs.bingoIcon.addEventListener("animationend", () => {
+      this.bingoIconList = "";
+      this.icon = "";
     });
   },
-  beforeDestroy() {
-
-  },
+  beforeDestroy() {},
 };
 </script>
 
@@ -327,8 +387,6 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
 }
-
-
 
 .post-edit {
   width: 100%;
@@ -451,7 +509,7 @@ export default {
   animation-timing-function: ease-in-out;
 }
 
-.remove{
+.remove {
   left: 748px;
   top: 50%;
   transform: translate(0, -50%);
@@ -525,11 +583,21 @@ export default {
   padding-bottom: 0;
 }
 
-#search{
+#search {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+.quiz-info {
+  width: 100%;
+  height: 50px;
+  border: 1px solid black;
+  margin: 8px 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-align: left;
 }
 </style>

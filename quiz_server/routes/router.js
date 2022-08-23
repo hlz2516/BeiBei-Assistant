@@ -75,12 +75,20 @@ router.get('/quizs',async (req,res,next)=>{
 })
 
 router.get('/quiz',async (req,res,next)=>{
-  const id = req.query.id
+  const keyWord = req.query.keyword
   try {
-    data = await quizHelper.selectById(id)
-    res.status(200).json(data[0]);
+    let data = null;
+    let regex = /^[0-9]+$/;
+    if (regex.test(keyWord)) {
+      data = await quizHelper.selectById(keyWord)
+    }
+    else{
+      data = await quizHelper.selectByKeyword(keyWord)
+    }
+    res.status(200).json(data);
   } catch (error) {
-    res.status(500).send('Error')
+    console.error(error)
+    res.status(500).send(error)
   }
 })
 
