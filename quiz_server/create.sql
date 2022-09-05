@@ -1,13 +1,29 @@
 drop table if exists quiz;
+drop table if exists repo;
+drop table if exists user
 drop table if exists tag;
+
 
 create table tag(
     id char(16) primary key,
     name char(16) unique not null
 );
 
+create table user(
+    id int primary key auto_increment,
+    name varchar(16) not null,
+    password varchar(15) not null
+);
+
+create table repo(
+    id char(16) primary key,
+    user_id int references user(id),
+    name varchar(32) not null,
+);
+
 create table quiz(
     id bigint primary key auto_increment,
+    repo_id char(16) references repo(id),
     question varchar(128) not null,
     answer varchar(512) not null,
     -- 格式:'tag1|tag2|tag3'

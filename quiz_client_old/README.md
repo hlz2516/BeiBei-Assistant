@@ -1,4 +1,4 @@
-# quiz_client
+# quiz_client_old(基于vue2)
 
 # 运行项目
 
