@@ -1,26 +1,24 @@
-drop table if exists quiz;
-drop table if exists repo;
-drop table if exists user
 drop table if exists tag;
-
-
 create table tag(
-    id char(16) primary key,
+    id char(16) primary key auto_increment,
     name char(16) unique not null
 );
 
-create table user(
+drop table if exists player;
+create table player(
     id int primary key auto_increment,
-    name varchar(16) not null,
+    name varchar(16) unique not null,
     password varchar(15) not null
 );
 
+drop table if exists repo;
 create table repo(
-    id char(16) primary key,
-    user_id int references user(id),
-    name varchar(32) not null,
+    id char(16) primary key auto_increment,
+    player_id int references player(id),
+    name varchar(32) not null
 );
 
+drop table if exists quiz;
 create table quiz(
     id bigint primary key auto_increment,
     repo_id char(16) references repo(id),

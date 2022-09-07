@@ -1,11 +1,16 @@
 import Mock from 'mockjs'
 
-Mock.mock(/\/userList/, 'get', {
-  code: 200,
-  data: [
-    {
-      id: '@id',
-      name: '@name'
-    }
-  ]
-})
+const result = {
+  status: 200,
+  data:null,
+  msg:'OK'
+}
+
+// Mock.mock('/api/login', 'post', (req)=>{
+//   const data = JSON.parse(req.body)
+//   result.data = {
+//     id:3,
+//     name:data.username,
+//     sessionid:'dfs25d4fdg54q3rl'
+//   }
+// })

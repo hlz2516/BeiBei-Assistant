@@ -1,4 +1,5 @@
 const db = require("../public/config/mysql_config");
+const tools = require('../public/tools/index')
 
 async function insert(quiz) {
   if (JSON.stringify(quiz) == "{}") {
@@ -174,6 +175,26 @@ async function selectById(id) {
   return res
 }
 
+async function selectByRepo(repoId) {  
+  let res = []
+
+  let sqlStr = 'select * from quiz where repo_id = ?'
+  await new Promise((resolve)=>{
+    db.query(sqlStr,repoId,(err,results)=>{
+      if (err) {
+        console.error(err)
+        return
+      }
+      res = tools.deepCopy(results)
+    })
+    .on('end',()=>{
+      resolve()
+    })
+  })
+
+  return res
+}
+
 async function selectByKeyword(keyWord) {  
   let res = []
 
@@ -221,5 +242,6 @@ module.exports = {
   update,
   selectById,
   selectByKeyword,
-  deleteById
+  deleteById,
+  selectByRepo
 };

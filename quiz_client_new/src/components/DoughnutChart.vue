@@ -48,7 +48,13 @@ export default {
     },
     styles: {
       type: Object,
-      default: () => {}
+      default: () => {
+        return {
+            position: 'responsive',
+            width: '100%',
+            height: '100%'
+        }
+      }
     },
     plugins: {
       type: Array,
@@ -70,18 +76,6 @@ export default {
       responsive: true,
       maintainAspectRatio: false
     }
-
-    // return () =>
-    //   h(Doughnut, {
-    //     chartData,
-    //     chartOptions,
-    //     chartId: props.chartId,
-    //     width: props.width,
-    //     height: props.height,
-    //     cssClasses: props.cssClasses,
-    //     styles: props.styles,
-    //     plugins: props.plugins
-    //   })
 
     return {
         chartData,

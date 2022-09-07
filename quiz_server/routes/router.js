@@ -2,7 +2,10 @@
 var express = require("express");
 const tagHelper = require("../SqlHelpers/TagHelper");
 const quizHelper = require("../SqlHelpers/QuizHelper");
+const playerHelper = require('../SqlHelpers/PlayerHelper')
 const tools = require("../public/tools/index");
+var jwt = require('jsonwebtoken');
+const {secretKey} = require('../public/config/index')
 
 var router = express.Router();
 
@@ -49,6 +52,7 @@ router.post("/new", async function (req, res, next) {
 
 router.get("/alltags", async function (req, res, next) {
   try {
+    console.log('auth',req.auth);
     const allTags = await tagHelper.getAll();
     const allTagList = allTags.map((val) => {
       return val["name"];
@@ -116,5 +120,30 @@ router.get('/quizrem',async (req,res,next)=>{
   }
 })
 
+router.post('/login',async (req,res,next)=>{  
+  const username = req.body['name']
+  const password = req.body['password']
+  //在数据库中查找是否存在该用户名
+  const user = await playerHelper.findByName(username)
+  //若不存在，则在用户表插入该用户名和密码
+  if(user.length === 0){
+    playerHelper.insert(username,password)
+  }
+  //若存在，则校验密码是否正确
+  else if(user.length === 1){
+    if (user[0].password !== password) {
+      return res.send({
+        status: 200,
+        message: '密码错误'
+       })
+    }
+  }
+   const tokenStr = jwt.sign({username},secretKey,{expiresIn:'6h'})
+   res.send({
+    status: 200,
+    message:'登录成功',
+    token:tokenStr
+   })
+})
 
 module.exports = router;

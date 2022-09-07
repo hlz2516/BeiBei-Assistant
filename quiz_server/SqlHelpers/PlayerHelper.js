@@ -9,33 +9,30 @@ async function findByName(name) {
       console.log('find by name err',err.message);
       return;
     }
-    res = result.concat();
+    res = tools.deepCopy(result)
   };
 
   await new Promise((resolve) => {
     db.query(sqlStr, name, getResult).on("end", function () {
-      // all rows have been received
       resolve();
     });
   });
-  console.log('res',res);
   return res;
 }
 
 async function findById(id) {
   let res = [];
-  let sqlStr = "select id,name from player where id = ?";
+  let sqlStr = "select id,name,password from player where id = ?";
   let getResult = function (err, result) {
     if (err) {
       console.log('find by id err',err.message);
       return;
     }
-    res = result.concat();
+    res = tools.deepCopy(result)
   };
 
   await new Promise((resolve) => {
     db.query(sqlStr, id, getResult).on("end", function () {
-      // all rows have been received
       resolve();
     });
   });
@@ -44,10 +41,9 @@ async function findById(id) {
 }
 
 function insert(name,password) {
-  let sqlStr = "insert into player(id,name,password) values(?,?,?)";
-  let playerId = tools.uuid(16, 16);
+  let sqlStr = "insert into player(name,password) values(?,?)";
   try {
-    db.query(sqlStr, [playerId, name,password], (err, results) => {
+    db.query(sqlStr, [name,password], (err, results) => {
       if (err) {
         console.log('player insert error',err.message);
         return;
@@ -56,7 +52,7 @@ function insert(name,password) {
         console.log("insert 1 player succeed");
       }
     });
-    return playerId;
+    return 0;
   } catch (error) {
     console.error(error);
     return -1;

@@ -3,12 +3,13 @@ var express = require("express");
 var path = require("path");
 var bodyParser = require('body-parser');
 var cookieParser = require("cookie-parser");
+var jwt = require('jsonwebtoken');
+var { expressjwt: jwt } = require("express-jwt");
 var logger = require("morgan");
-var db = require("./public/config/mysql_config");
-
 // var indexRouter = require('./routes/index');
-// var usersRouter = require('./routes/users');
+// var usesRouter = require('./routes/user');
 var router = require('./routes/router')
+const {secretKey} = require('./public/config/index')
 
 var app = express();
 
@@ -29,8 +30,15 @@ app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   next();
 });
-
-app.use('/api',router)
+//每次请求过来时，自动找到请求头中的authorization字段，取出jwt，指定secret和算法进行解析
+//可以通过unless设置不需要身份认证的路由，就不会进行解析
+//注意，只要配置成功了，expressJwt中间件会在req上挂载一个user，也就是jwt解析出来的用户信息
+//密码不要放入jwt字符串中，因为可以解密出来
+// app.use('/my',usesRouter)
+app.use('/api',jwt({
+  secret:secretKey,
+  algorithms: ["HS256"]
+}).unless({path:[/\/login$/]}),router)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -43,9 +51,11 @@ app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render("error");
+  if (err.name === 'UnauthorizedError') {
+    return res.send({ status:401,message:'invalid token'})
+  }
+ 
+  res.send({status:500,message:'未知错误，请联系开发者'})
 });
 
 module.exports = app;

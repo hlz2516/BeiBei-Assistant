@@ -2,27 +2,31 @@
   <div class="layout">
     <Layout>
       <Header>
-        <Menu mode="horizontal" theme="dark" active-name="general">
+        <Menu mode="horizontal" theme="dark" active-name="login">
           <div class="layout-user">
             <div class="avatar">
               <Avatar icon="ios-person" />
             </div>
-            <div class="user-name">我是张三</div>
+            <div class="user-name">{{userName}}</div>
           </div>
           <div class="layout-nav">
+            <MenuItem name="login" to="/login">
+              <Icon type="md-person" />
+              登 录
+            </MenuItem>
             <MenuItem name="newQues">
               <Icon type="md-bulb" />
               出 题
             </MenuItem>
-            <MenuItem name="remQues">
+            <MenuItem name="remQues" to="/home">
               <Icon type="md-play" />
               背 题
             </MenuItem>
-            <MenuItem name="general">
+            <MenuItem name="general" to="/general">
               <Icon type="md-pulse" />
               概 况
             </MenuItem>
-            <MenuItem name="general">
+            <MenuItem name="setup" >
               <Icon type="md-cog" />
               设 置
             </MenuItem>
@@ -33,25 +37,7 @@
         <Breadcrumb :style="{ margin: '20px 0' }">
           <BreadcrumbItem>general</BreadcrumbItem>
         </Breadcrumb>
-
-        <div class="ivu-b main-part">
-          <div class="doughs-part">
-            <div class="divide">
-              <card class="expand"></card>
-            </div>
-            <div class="divide">
-              <card class="expand"></card>
-            </div>
-          </div>
-          <div class="line-part">
-            <div class="divide">
-              <card class="expand"></card>
-            </div>
-            <div class="divide">
-              <card class="expand"></card>
-            </div>
-          </div>
-        </div>
+        <router-view></router-view>
       </Content>
       <Footer class="layout-footer-center">2011-2016 &copy; View Design</Footer>
     </Layout>
@@ -59,16 +45,17 @@
 </template>
 
 <script>
-import BarChart from "./components/BarChart.vue";
-import DoughnutChart from "./components/DoughnutChart.vue";
-
 export default {
-  components: { BarChart, DoughnutChart },
   name: "App",
+  data() {
+    return {
+      userName:'未登录'
+    }
+  },
 };
 </script>
 
-<style lang="less">
+<style>
 body {
   font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei";
@@ -123,44 +110,4 @@ body {
   align-items: center;
   color: #d7dde4;
 }
-
-@padding-len:8px;
-
-.main-part {
-  min-height: 750px;
-  display: flex;
-  padding: @padding-len;
-
-  .doughs-part {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-  }
-
-  .line-part {
-    flex: 7;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-  }
-  
-  .divide {
-    flex: 1;
-    padding: @padding-len;
-
-    .expand {
-      width: 100%;
-      height: 100%;
-    }
-  }
-}
-
-
-
-
-
-
 </style>
