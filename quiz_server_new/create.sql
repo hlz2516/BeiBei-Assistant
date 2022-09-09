@@ -16,7 +16,7 @@ create table player(
 drop table if exists repo;
 create table repo(
     id int primary key auto_increment,
-    player_id int references player(id),
+    playerId int references player(id),
     name varchar(32) not null,
     destroy_time Timestamp null
 );
@@ -24,7 +24,7 @@ create table repo(
 drop table if exists quiz;
 create table quiz(
     id bigint primary key auto_increment,
-    repo_id int references repo(id),
+    repoId int references repo(id),
     question varchar(128) not null,
     answer varchar(2048) not null,
     -- 通过tagquizs表与quiz表进行多对多关联
@@ -41,7 +41,7 @@ create table quiz(
 drop table if exists tagquizs;
 create table tagquizs(
     id int primary key auto_increment,
-    tag_id int references tag(id),
-    quiz_id bigint references quiz(id),
+    tagId int references tag(id),
+    quizId bigint references quiz(id),
     destroy_time Timestamp null
 );

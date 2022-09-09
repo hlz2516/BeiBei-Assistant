@@ -1,5 +1,6 @@
 const { dbContext, DataTypes } = require("../common/dbContext");
 const crypt = require("../common/sec");
+const {defineMaxId} = require('../common')
 
 const Player = dbContext.define(
   "player",
@@ -38,10 +39,6 @@ const Player = dbContext.define(
   }
 );
 
-Object.defineProperty(Player, "maxId", {
-  async get() {
-    return await this.max("id");
-  },
-});
+defineMaxId(Player);
 
 module.exports = Player;

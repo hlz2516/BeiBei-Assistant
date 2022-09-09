@@ -1,5 +1,8 @@
 const { dbContext, DataTypes } = require("../common/dbContext");
 const Repo = require("./Repo");
+const Tag = require('./Tag');
+const TagQuizs = require('./TagQuizs')
+const {defineMaxId} = require('../common')
 
 const Quiz = dbContext.define("quiz", {
   id: {
@@ -7,14 +10,14 @@ const Quiz = dbContext.define("quiz", {
     primaryKey: true,
     autoIncrement: true,
   },
-  repo_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Repo,
-      key: "id",
-    },
-  },
+  // repoId: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  //   references: {
+  //     model: Repo,
+  //     key: "id",
+  //   },
+  // },
   question: {
     type: DataTypes.STRING(128),
     allowNull: false,
@@ -38,12 +41,18 @@ const Quiz = dbContext.define("quiz", {
 },
 {
     tableName:'quiz',
-    timestamps:false
+    timestamps:true,
+    createdAt:false,
+    updatedAt:'last_time',
+    deletedAt:'destroy_time',
+    paranoid:true
 });
 
-Repo.hasMany(Quiz);
-Quiz.belongsTo(Repo, {
-  foreignKey: "repo_id",
-});
+defineMaxId(Quiz);
+
+
+//一个标签可以有多个题目，一个题目可以有多个标签
+Tag.belongsToMany(Quiz,{through:TagQuizs})
+Quiz.belongsToMany(Tag,{through:TagQuizs})
 
 module.exports = Quiz;

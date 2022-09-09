@@ -1,7 +1,6 @@
 const Player = require('../daos/Player');
 const {Op} = require('sequelize');
 const encrypt = require('../common/sec')
-const {objfy} = require('../common')
 
 async function findAll(){
     try {
@@ -9,7 +8,7 @@ async function findAll(){
         if (players === null) {
             console.error(`no players`);
         } else {
-            return objfy(players);
+            return players;
         }
     } catch (error) {
         console.log(`findAll err:${error}`);
@@ -22,7 +21,7 @@ async function findById(id) {
         if (player === null) {
             console.error(`no player's id is ${id}`);
         } else {
-            return objfy(player);
+            return player;
         }
     } catch (error) {
         console.log(`findById err:${error},id:${id}`);
@@ -39,7 +38,7 @@ async function findByName(name) {
         if (player === null) {
             console.error(`no player's name is ${name}`);
         } else {
-            return objfy(player);
+            return player;
         }
     } catch (error) {
         console.log(`findByName err:${error},name:${name}`);
@@ -59,13 +58,15 @@ async function insert(name,password){
             console.warn(info);
             return { info }
         }
+        const maxId = await Player.maxId;
         const player = await Player.create({
+            id:maxId+1,
             name,password
         })
         if (player === null) {
             throw new Error('create a new player error!')
         }
-        return objfy(player);
+        return player;
     } catch (error) {
         console.error(`insert err:${error},name:${name},password:${password}`);
     }
@@ -75,15 +76,9 @@ async function removeByName(name){
     try {
         let player = await findByName(name);
         if (player === null) {
-            return 0;
+            return player;
         }
-        player = JSON.parse(player);
-        await Player.destroy({
-            where:{
-                id:player.id
-            }
-        })
-        return player;
+        return await player.destroy();
     } catch (error) {
         console.error(`remove err:${error},name:${name}`);
     }
@@ -93,13 +88,9 @@ async function removeById(id){
     try {
         let player = await findById(id);
         if (player === null) {
-            return 0;
+            return player;
         }
-        player = JSON.parse(player);
-        await Player.destroy({
-            where:{ id }
-        })
-        return player;
+        return await player.destroy();
     } catch (error) {
         console.error(`remove err:${error},id:${id}`);
     }

@@ -1,9 +1,11 @@
 const { Sequelize,DataTypes } = require("sequelize");
+const dbConfig = require('./dbConfig');
+
 console.log('dbcontext created');
 //dbContext 是指 Sequelize 的实例,它表示与一个数据库的连接
-const dbContext = new Sequelize("interview_dev", "root", "Hlz19961211/", {
-  host: "www.normal-hu.top",
-  dialect: "mysql",
+const dbContext = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
+  host: dbConfig.host,
+  dialect: dbConfig.db_type,
 });
 
 //测试连接

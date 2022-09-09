@@ -1,6 +1,8 @@
 const { dbContext, DataTypes } = require("../common/dbContext");
+const {defineMaxId} = require('../common')
 const Quiz = require("./Quiz");
 const Tag = require("./Tag");
+
 
 const TagQuizs = dbContext.define("tagquizs", {
   id: {
@@ -25,10 +27,14 @@ const TagQuizs = dbContext.define("tagquizs", {
 },
 {
     tableName:'tagquizs',
-    timestamps:false
+    timestamps:true,
+    deletedAt:'destroy_time',
+    createdAt:false,
+    updatedAt:false,
+    //软删除必须设置
+    paranoid: true
 });
 
-Quiz.belongsToMany(Tag, { through: TagQuizs });
-Tag.belongsToMany(Quiz, { through: TagQuizs });
+defineMaxId(TagQuizs)
 
 module.exports = TagQuizs;

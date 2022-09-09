@@ -1,4 +1,5 @@
 const { dbContext, DataTypes } = require("../common/dbContext");
+const {defineMaxId} = require('../common')
 
 const Tag = dbContext.define("tag", {
   id: {
@@ -22,10 +23,6 @@ const Tag = dbContext.define("tag", {
     paranoid: true
 });
 
-Object.defineProperty(Tag,'maxId',{
-    async get(){
-        return await this.max('id');
-    }
-})
+defineMaxId(Tag);
 
 module.exports = Tag;
