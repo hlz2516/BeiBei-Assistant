@@ -30,7 +30,7 @@ app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   next();
 });
-//每次请求过来时，自动找到请求头中的authorization字段，取出jwt，指定secret和算法进行解析
+//每次请求过来时，自动找到请求头中的Authorization字段，取出jwt，指定secret和算法进行解析
 //可以通过unless设置不需要身份认证的路由，就不会进行解析
 //注意，只要配置成功了，expressJwt中间件会在req上挂载一个user，也就是jwt解析出来的用户信息
 //密码不要放入jwt字符串中，因为可以解密出来

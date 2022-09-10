@@ -124,26 +124,31 @@ router.post('/login',async (req,res,next)=>{
   const username = req.body['name']
   const password = req.body['password']
   //在数据库中查找是否存在该用户名
-  const user = await playerHelper.findByName(username)
-  //若不存在，则在用户表插入该用户名和密码
-  if(user.length === 0){
-    playerHelper.insert(username,password)
-  }
-  //若存在，则校验密码是否正确
-  else if(user.length === 1){
-    if (user[0].password !== password) {
-      return res.send({
-        status: 200,
-        message: '密码错误'
-       })
-    }
-  }
+  // const user = await playerHelper.findByName(username)
+  // //若不存在，则在用户表插入该用户名和密码
+  // if(user.length === 0){
+  //   playerHelper.insert(username,password)
+  // }
+  // //若存在，则校验密码是否正确
+  // else if(user.length === 1){
+  //   if (user[0].password !== password) {
+  //     return res.send({
+  //       status: 200,
+  //       message: '密码错误'
+  //      })
+  //   }
+  // }
    const tokenStr = jwt.sign({username},secretKey,{expiresIn:'6h'})
    res.send({
     status: 200,
     message:'登录成功',
     token:tokenStr
    })
+})
+
+router.get('/test',(req,res,next)=>{
+  console.log(req.body);
+  res.json({msg:'OK'})
 })
 
 module.exports = router;

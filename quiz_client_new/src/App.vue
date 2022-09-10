@@ -2,15 +2,20 @@
   <div class="layout">
     <Layout>
       <Header>
-        <Menu mode="horizontal" theme="dark" active-name="login">
+        <Menu
+          mode="horizontal"
+          theme="dark"
+          v-bind:active-name="activedName"
+          @onSelect="handleSelect"
+        >
           <div class="layout-user">
             <div class="avatar">
               <Avatar icon="ios-person" />
             </div>
-            <div class="user-name">{{userName}}</div>
+            <div class="user-name">{{ $store.state.userName }}</div>
           </div>
           <div class="layout-nav">
-            <MenuItem name="login" to="/login">
+            <MenuItem name="login" to="login">
               <Icon type="md-person" />
               登 录
             </MenuItem>
@@ -18,26 +23,27 @@
               <Icon type="md-bulb" />
               出 题
             </MenuItem>
-            <MenuItem name="remQues" to="/home">
+            <MenuItem name="remQues">
               <Icon type="md-play" />
               背 题
             </MenuItem>
-            <MenuItem name="general" to="/general">
+            <MenuItem name="general" to="general">
               <Icon type="md-pulse" />
               概 况
             </MenuItem>
-            <MenuItem name="setup" >
+            <MenuItem name="setup">
               <Icon type="md-cog" />
               设 置
             </MenuItem>
           </div>
         </Menu>
       </Header>
-      <Content :style="{ padding: '0 50px' }">
-        <Breadcrumb :style="{ margin: '20px 0' }">
-          <BreadcrumbItem>general</BreadcrumbItem>
-        </Breadcrumb>
-        <router-view></router-view>
+      <Content :style="{ padding: '0 50px', margin: '30px 0' }">
+        <router-view v-slot="{ Component }">
+          <keep-alive>
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </Content>
       <Footer class="layout-footer-center">2011-2016 &copy; View Design</Footer>
     </Layout>
@@ -45,11 +51,48 @@
 </template>
 
 <script>
+import {ref} from 'vue';
+import common from "./common";
+
 export default {
   name: "App",
-  data() {
+  setup() {
+    //准备数据
+    let activedName = ref("login");
+    //准备方法
+    function handleSelect(name) {
+      if (name === "login") {
+        return;
+      }
+      console.log('name',name);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        //目前只能通过这种重置再改变的方式让active的样式生效
+        setTimeout(() => {
+          activedName.value = '';
+        }, 0);
+        setTimeout(() => {
+          activedName.value = 'login';
+        }, 0);
+      } else {
+        activedName.value = name;
+      }
+    }
+
     return {
-      userName:'未登录'
+      activedName,
+      handleSelect
+    }
+  },
+
+  mounted() {
+    this.$router.replace("/login");
+    const jwt = localStorage.getItem("token");
+    if (jwt) {
+      console.log(jwt);
+      let info = common.getInfoFromJwt(jwt.toString());
+      info = JSON.parse(info);
+      this.$store.dispatch("setUser", info);
     }
   },
 };

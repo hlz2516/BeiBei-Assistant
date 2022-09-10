@@ -1,7 +1,7 @@
 <template>
   <div class="container">
             <template v-if="!logined" >
-                <login />
+                <login @log-in="login" @log-out="logout"  />
                 <card style="width:400px;height:400px;">
                     <template v-slot:title>
                         <h3>
@@ -35,8 +35,18 @@ export default {
         }
     },
     methods: {
+        login(){
+            this.logined = true
+        },
         logout(){
+            localStorage.removeItem('token');
             this.logined = false
+            this.$store.dispatch('resetUser');
+        }
+    },
+    mounted() {
+        if(localStorage.getItem('token')){
+            this.logined = true
         }
     },
 }

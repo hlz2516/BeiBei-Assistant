@@ -118,7 +118,7 @@ async function updatePassword({id,password}){
     }
 }
 
-async function checkPassword({id,password}){
+async function checkPassword({id},password){
     try {
         let player = await findById(id);
         if (player === null) {
@@ -126,9 +126,8 @@ async function checkPassword({id,password}){
             console.error(info);
             return { info }
         }
-        player = JSON.parse(player);
         const encryptedPwd = encrypt.md5Encrypt(password)
-        if (player.password === encryptedPwd) 
+        if (player.dataValues['password'] === encryptedPwd) 
             return true
         else{
             return false
