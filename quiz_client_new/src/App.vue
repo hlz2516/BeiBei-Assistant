@@ -19,6 +19,10 @@
               <Icon type="md-person" />
               登 录
             </MenuItem>
+             <MenuItem name="repo" to="repo">
+              <Icon type="ios-paper" />
+              题库管理
+            </MenuItem>
             <MenuItem name="newQues">
               <Icon type="md-bulb" />
               出 题
@@ -32,7 +36,7 @@
               概 况
             </MenuItem>
             <MenuItem name="setup">
-              <Icon type="md-cog" />
+              <Icon type="md-settings" />
               设 置
             </MenuItem>
           </div>
@@ -40,9 +44,9 @@
       </Header>
       <Content :style="{ padding: '0 50px', margin: '30px 0' }">
         <router-view v-slot="{ Component }">
-          <keep-alive>
+          <!-- <keep-alive> -->
             <component :is="Component" />
-          </keep-alive>
+          <!-- </keep-alive> -->
         </router-view>
       </Content>
       <Footer class="layout-footer-center">2011-2016 &copy; View Design</Footer>
@@ -61,22 +65,22 @@ export default {
     let activedName = ref("login");
     //准备方法
     function handleSelect(name) {
-      if (name === "login") {
-        return;
-      }
-      console.log('name',name);
-      const token = localStorage.getItem("token");
-      if (!token) {
-        //目前只能通过这种重置再改变的方式让active的样式生效
-        setTimeout(() => {
-          activedName.value = '';
-        }, 0);
-        setTimeout(() => {
-          activedName.value = 'login';
-        }, 0);
-      } else {
-        activedName.value = name;
-      }
+      // if (name === "login") {
+      //   return;
+      // }
+      // console.log('name',name);
+      // const token = localStorage.getItem("token");
+      // if (!token) {
+      //   //目前只能通过这种重置再改变的方式让active的样式生效
+      //   setTimeout(() => {
+      //     activedName.value = '';
+      //   }, 0);
+      //   setTimeout(() => {
+      //     activedName.value = 'login';
+      //   }, 0);
+      // } else {
+      //   activedName.value = name;
+      // }
     }
 
     return {
@@ -124,7 +128,7 @@ body {
   align-items: center;
 }
 .layout-nav {
-  width: 420px;
+  width: 600px;
   margin: 0 auto;
   margin-right: 20px;
 }

@@ -4,7 +4,7 @@
       <div class="divide">
         <card class="expand">
           <template v-slot:title>
-            <h3>你背过的题目的熟悉程度概况</h3>
+            <h3>题目的熟悉程度概况</h3>
           </template>
           <DoughnutChart />
         </card>
@@ -12,7 +12,7 @@
       <div class="divide">
         <card class="expand">
           <template v-slot:title>
-            <h3>你背过的题目的标签概况</h3>
+            <h3>题目的标签概况</h3>
           </template>
           <DoughnutChart />
         </card>

@@ -60,11 +60,12 @@ app.listen(port, () => {
 //test
 // async function doSth(){
 //    try {
-//     let repo = await repoServ.findById(2)
-//     let res = await repoServ.removeById(repo.getDataValue('id'))
-//     console.log(res);
+//     //查找一个题库下的题目数量
+//     let b = await repoServ.findByName('java',9);
+//     let quizCount = await repoServ.getQuizCount(b.getDataValue('id'))
+//     console.log('quizCount',quizCount);
 //    } catch (error) {
-
+//     console.log('error:',error);
 //    }
 // }
 

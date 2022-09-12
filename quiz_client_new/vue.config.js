@@ -42,7 +42,8 @@ const config = {
         },
       }
     }
-  }
+  },
+  lintOnSave:false
 }
 
 module.exports = defineConfig(config)

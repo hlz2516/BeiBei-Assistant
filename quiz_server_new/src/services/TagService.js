@@ -46,7 +46,7 @@ async function insert(name) {
     let maxId = await Tag.maxId;
     const newTag = await Tag.create({
       id: maxId + 1,
-      name,
+      name:name.toLowerCase(),
     });
     if (newTag === null) {
       throw new Error("create a new tag error!");

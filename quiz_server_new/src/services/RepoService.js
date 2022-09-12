@@ -29,11 +29,13 @@ async function findById(id) {
   }
 }
 
-async function findByName(name) {
+async function findByName(name,playerId) {
   try {
+    if(!playerId) playerId = null;
     const repo = await Repo.findOne({
       where: {
         name,
+        playerId
       },
     });
     if (repo === null) {
@@ -42,7 +44,7 @@ async function findByName(name) {
       return repo;
     }
   } catch (error) {
-    console.log(`findByName err:${error},name:${name}`);
+    console.log(`findByName err:${error},name:${name},playerId:${playerId}`);
   }
 }
 
@@ -132,6 +134,18 @@ async function updateName({ id, name }) {
   }
 }
 
+async function getQuizCount(id){
+  try {
+    let repo = await Repo.findAll({
+      where: { id },
+      include: Quiz,
+    });
+    return repo[0].quizzes.length;
+  } catch (error) {
+    console.error(`getQuizCount err:${error},id:${id}`);
+  }
+}
+
 module.exports = {
   findAll,
   findById,
@@ -141,4 +155,5 @@ module.exports = {
   removeById,
   removeByName,
   updateName,
+  getQuizCount
 };
