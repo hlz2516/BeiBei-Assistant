@@ -40,8 +40,48 @@ create table quiz(
 
 drop table if exists tagquizs;
 create table tagquizs(
-    id int primary key auto_increment,
-    tagId int references tag(id),
-    quizId bigint references quiz(id),
-    destroy_time Timestamp null
+    -- id int primary key auto_increment,
+    tagId int not null references tag(id),
+    quizId bigint not null references quiz(id),
+    destroy_time Timestamp null,
+    primary key(tagId,quizId)
 );
+
+drop table if exists pub_repo;
+create table pub_repo(
+    id int primary key auto_increment,
+    code char(6) unique not null,
+    name varchar(32) unique not null 
+);
+
+drop table if exists pub_quiz;
+create table pub_quiz(
+    id bigint primary key auto_increment,
+    code char(6) not null references pub_repo(code),
+    question varchar(128) not null,
+    answer varchar(2048) not null,
+    importance char(16) default 'unknown',
+    tags json default '[]'
+);
+
+insert into player(`name`,`password`) values('张三','a123456');
+
+insert into repo(`name`,playerId) values('前端',1);
+
+insert into quiz(question,answer,repoId) values('ques','ans',1);
+insert into quiz(question,answer,repoId) values('ques1','ans1',1);
+insert into quiz(question,answer,repoId) values('ques2','ans2',1);
+
+insert into tag(`name`) values('java');
+insert into tag(`name`) values('C#');
+insert into tag(`name`) values('php');
+insert into tag(`name`) values('node');
+insert into tag(`name`) values('javascript');
+
+
+insert into tagquizs(quizId,tagId) values(1,1);
+insert into tagquizs(quizId,tagId) values(1,2);
+insert into tagquizs(quizId,tagId) values(1,3);
+insert into tagquizs(quizId,tagId) values(2,4);
+insert into tagquizs(quizId,tagId) values(2,5);
+insert into tagquizs(quizId,tagId) values(2,6);
