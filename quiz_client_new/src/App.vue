@@ -23,7 +23,7 @@
               <Icon type="ios-paper" />
               题库管理
             </MenuItem>
-            <MenuItem name="newQues">
+            <MenuItem name="newQues" to="newQuiz">
               <Icon type="md-bulb" />
               出 题
             </MenuItem>

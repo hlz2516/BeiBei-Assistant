@@ -10,14 +10,14 @@ const Quiz = dbContext.define("quiz", {
     primaryKey: true,
     autoIncrement: true,
   },
-  // repoId: {
-  //   type: DataTypes.INTEGER,
-  //   allowNull: false,
-  //   references: {
-  //     model: Repo,
-  //     key: "id",
-  //   },
-  // },
+  repoId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Repo,
+      key: "id",
+    },
+  },
   question: {
     type: DataTypes.STRING(128),
     allowNull: false,

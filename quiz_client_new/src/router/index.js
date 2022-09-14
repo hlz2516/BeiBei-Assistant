@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '../pages/LoginPage.vue';
 import GeneralPage from '../pages/GeneralPage.vue';
 import RepoPage from '../pages/RepoPage.vue';
+import NewQuizPage from '../pages/NewQuizPage.vue';
 
 const routes = [
   {
@@ -14,6 +15,11 @@ const routes = [
     path:'/repo',
     name: 'repo',
     component:RepoPage
+  },
+  {
+    path:'/newQuiz',
+    name:'newQuiz',
+    component:NewQuizPage
   },
   {
     path:'/general',

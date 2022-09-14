@@ -37,7 +37,7 @@ drop procedure if exists upload;
 DELIMITER $$
 
 CREATE
-    PROCEDURE `interview_dev`.`upload`(in repo_id int,in code char(6),out result char(8))
+    PROCEDURE `interview_dev`.`upload`(in repo_id int,in code char(6))
 	-- 存储过程体
 	BEGIN
 		-- 根据repo_id找到repo_name，插入到pub_repo表
@@ -52,7 +52,7 @@ CREATE
 		declare tags json default '[]';
 		declare cur_quiz cursor for select `id`,`question`,`answer`,`importance` from quiz where `repoId` = repo_id;
 		declare continue handler for not found set done = 1;
-		
+
 		select `name` into repo_name from repo where `id` = repo_id;
 		insert into pub_repo(`code`,`name`) values(code,repo_name);
 		-- 循环游标，每次取出一个quiz，就赋予q,a,i三个变量，并去tagquizs表寻找对应的tag，封装成tags，最后插入到pub_quiz表
@@ -141,7 +141,7 @@ create procedure `interview_dev`.`download`(in player_id int,in code char(6))
         declare continue handler for not found set done = 1;
         
         select `name` into repo_name from pub_repo where `code` = code;
-        insert into repo(playerId,`name`) values(player_id,repo_name); 
+        insert into repo(playerId,`name`,origin) values(player_id,repo_name,code); 
         select id into repo_id from repo where `playerId` = player_id and `name` = repo_name;
 
         open cur_quiz;

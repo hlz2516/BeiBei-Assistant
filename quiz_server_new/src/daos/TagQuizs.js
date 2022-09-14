@@ -5,17 +5,13 @@ const Tag = require("./Tag");
 
 
 const TagQuizs = dbContext.define("tagquizs", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
   TagId: {
     type: DataTypes.INTEGER,
     references: {
       model: Tag,
       key: "id",
     },
+    unique:'tagQuizIndex'
   },
   QuizId: {
     type: DataTypes.INTEGER,
@@ -23,6 +19,7 @@ const TagQuizs = dbContext.define("tagquizs", {
       model: Quiz,
       key: "id",
     },
+    unique:'tagQuizIndex'
   },
 },
 {

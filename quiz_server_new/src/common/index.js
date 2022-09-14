@@ -21,8 +21,18 @@ function getOrigin(type,obj){
   }
 }
 
+function randomString(len) {    
+    len = len || 32;
+    var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678",
+    a = t.length,
+    n = "";
+    for (i = 0; i < len; i++) n += t.charAt(Math.floor(Math.random() * a));
+    return n
+}
+
 module.exports = {
     objfy,
     defineMaxId,
-    getOrigin
+    getOrigin,
+    randomString
 }

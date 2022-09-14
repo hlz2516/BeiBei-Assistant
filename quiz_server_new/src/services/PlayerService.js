@@ -1,7 +1,7 @@
 const Player = require('../daos/Player');
 const Repo = require('../daos/Repo');
 const {Op} = require('sequelize');
-const encrypt = require('../common/sec')
+const encrypt = require('../common/sec');
 
 async function findAll(){
     try {
@@ -142,8 +142,13 @@ async function checkPassword({id},password){
 async function getRepos(id) {
     try {
         const player = await Player.findAll({
-            where:id,
-            include:Repo
+            where:{
+                id
+            },
+            include:{
+                model:Repo,
+                required:true
+            }
         });
         return player[0].repos;
     } catch (error) {

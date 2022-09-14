@@ -9,6 +9,7 @@ const playerRouter = require("./routes/PlayerRouter");
 const repoRouter = require("./routes/RepoRouter");
 const { expressjwt: jwt } = require("express-jwt");
 const { secretKey } = require("./common/sec");
+const {upload,download} = require('./common/dbContext')
 
 const port = 9000;
 //解析 JSON 格式的请求体数据，有了这个就可以不用手动使用body-parser(它本身基于body-parser)
@@ -60,12 +61,10 @@ app.listen(port, () => {
 //test
 // async function doSth(){
 //    try {
-//     //查找一个题库下的题目数量
-//     let b = await repoServ.findByName('java',9);
-//     let quizCount = await repoServ.getQuizCount(b.getDataValue('id'))
-//     console.log('quizCount',quizCount);
+//      const result = await upload(36,'aabbdd');
+//      console.log('result',result);
 //    } catch (error) {
-//     console.log('error:',error);
+//     console.log('dosth error:',error);
 //    }
 // }
 

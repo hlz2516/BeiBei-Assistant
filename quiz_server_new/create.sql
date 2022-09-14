@@ -18,7 +18,9 @@ create table repo(
     id int primary key auto_increment,
     playerId int references player(id),
     name varchar(32) not null,
-    destroy_time Timestamp null
+    origin char(6) default '',
+    destroy_time Timestamp null,
+    unique index(playerId,name)
 );
 
 drop table if exists quiz;
@@ -44,7 +46,7 @@ create table tagquizs(
     tagId int not null references tag(id),
     quizId bigint not null references quiz(id),
     destroy_time Timestamp null,
-    primary key(tagId,quizId)
+    unique index(tagId,quizId)
 );
 
 drop table if exists pub_repo;
@@ -61,7 +63,7 @@ create table pub_quiz(
     question varchar(128) not null,
     answer varchar(2048) not null,
     importance char(16) default 'unknown',
-    tags json default '[]'
+    tags json
 );
 
 insert into player(`name`,`password`) values('张三','a123456');

@@ -1,4 +1,4 @@
-const { Sequelize,DataTypes } = require("sequelize");
+const { Sequelize,DataTypes,QueryTypes } = require("sequelize");
 const dbConfig = require('./dbConfig');
 
 console.log('dbcontext created');
@@ -6,6 +6,9 @@ console.log('dbcontext created');
 const dbContext = new Sequelize(dbConfig.database, dbConfig.user, dbConfig.password, {
   host: dbConfig.host,
   dialect: dbConfig.db_type,
+  dialectOptions: {
+    multipleStatements: true
+  }  
 });
 
 //测试连接
@@ -18,7 +21,37 @@ dbContext.authenticate().then(
   }
 );
 
+async function upload(repoId,code) {
+  try {
+    await dbContext.query('call upload(?,?);',
+    {
+      replacements:[repoId,code],
+      type:QueryTypes.ROW
+    })
+    return 0;
+  } catch (error) {
+    console.error(error);
+    return -1;
+  }
+}
+
+async function download(playerId,code) {
+  try {
+    await dbContext.query('call download(?,?);',
+    {
+      replacements:[playerId,code],
+      type:QueryTypes.ROW
+    })
+    return 0;
+  } catch (error) {
+    console.error(error);
+    return -1;
+  }
+}
+
 module.exports = {
     dbContext,
-    DataTypes
+    DataTypes,
+    upload,
+    download
 };
