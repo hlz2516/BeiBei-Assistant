@@ -26,6 +26,10 @@ const Quiz = dbContext.define("quiz", {
     type: DataTypes.STRING(2048),
     allowNull: false,
   },
+  references:{
+    type:DataTypes.STRING(256),
+    allowNull:true
+  },
   importance: {
     type: DataTypes.STRING(16),
     defaultValue: "unknown",

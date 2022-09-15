@@ -2,10 +2,11 @@ const { dbContext, DataTypes } = require("../common/dbContext");
 const {defineMaxId} = require('../common')
 const Quiz = require("./Quiz");
 const Tag = require("./Tag");
+const Player = require("./Player");
 
 
 const TagQuizs = dbContext.define("tagquizs", {
-  TagId: {
+  tagId: {
     type: DataTypes.INTEGER,
     references: {
       model: Tag,
@@ -13,7 +14,7 @@ const TagQuizs = dbContext.define("tagquizs", {
     },
     unique:'tagQuizIndex'
   },
-  QuizId: {
+  quizId: {
     type: DataTypes.INTEGER,
     references: {
       model: Quiz,
@@ -21,6 +22,13 @@ const TagQuizs = dbContext.define("tagquizs", {
     },
     unique:'tagQuizIndex'
   },
+  playerId:{
+    type:DataTypes.INTEGER,
+    references: {
+      model: Player,
+      key: "id",
+    },
+  }
 },
 {
     tableName:'tagquizs',
@@ -31,7 +39,5 @@ const TagQuizs = dbContext.define("tagquizs", {
     //软删除必须设置
     paranoid: true
 });
-
-defineMaxId(TagQuizs)
 
 module.exports = TagQuizs;

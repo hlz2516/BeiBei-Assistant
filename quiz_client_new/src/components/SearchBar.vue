@@ -22,6 +22,7 @@
 <script>
 export default {
   name: "SearchBar",
+  emits:['input','handle','focustodo','blurtodo'],
   props: {
     value: String,
     width: String,
@@ -32,7 +33,6 @@ export default {
     placeholder: String,
     "font-size": String
   },
-  emits:['input'],
   mounted() {
     const container = this.$refs.search;
     if (this.width) {

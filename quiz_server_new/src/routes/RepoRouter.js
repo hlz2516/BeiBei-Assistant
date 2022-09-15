@@ -2,16 +2,8 @@ const express = require("express");
 const playerServ = require("../services/PlayerService");
 const repoServ = require("../services/RepoService");
 const {download,upload} = require('../common/dbContext')
-const {randomString, objfy} = require('../common')
+const {randomString, checkUserValid} = require('../common')
 const router = express.Router();
-
-function checkUserValid(req) {
-    const id = req.auth.id;
-    if (id < 1) {
-      return new Error(`用户验证失败，id：${id}`);
-    }
-    return id;
-}
 
 router.get("/repos", async (req, res, next) => {
   try {
@@ -38,6 +30,22 @@ router.get("/repos", async (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/repos/name",async (req,res,next)=>{
+  try {
+    const id = checkUserValid(req);
+    let repos = await playerServ.getRepos(id);
+    repos = repos.map(repo=>{
+      return repo.getDataValue('name');
+    })
+    res.json({
+      repos,
+      status:200
+    })
+  } catch (error) {
+    next(error)
+  }
+})
 
 router.post("/repoadd", async (req, res, next) => {
   try {

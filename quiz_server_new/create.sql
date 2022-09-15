@@ -29,8 +29,10 @@ create table quiz(
     repoId int references repo(id),
     question varchar(128) not null,
     answer varchar(2048) not null,
-    -- 通过tagquizs表与quiz表进行多对多关联
+    -- 通过tagquizs表与quiz表进行多对多关联，这里不再记录
     -- tags char(64) not null,
+    -- 回答的参考链接
+    `references` varchar(256),
     -- 题目的重要程度，出题时决定 可选字符串 'important' 'understand' 'know' 'unknown'
     importance char(16) default 'unknown',
     -- 自己的记忆程度，可选字符串 'familiar' 'understand' 'hard' 'unknown',其中unknown是在数据库中还没抽到(背过)的题
@@ -45,6 +47,8 @@ create table tagquizs(
     -- id int primary key auto_increment,
     tagId int not null references tag(id),
     quizId bigint not null references quiz(id),
+    -- 为了能让用户根据标签搜索，后台查询更方便快速，增加该字段
+    playerId int references player(id),
     destroy_time Timestamp null,
     unique index(tagId,quizId)
 );
@@ -66,7 +70,7 @@ create table pub_quiz(
     tags json
 );
 
-insert into player(`name`,`password`) values('张三','a123456');
+insert into player(`name`,`password`) values('tom','dc483e80a7a0bd9ef71d8cf973673924');
 
 insert into repo(`name`,playerId) values('前端',1);
 

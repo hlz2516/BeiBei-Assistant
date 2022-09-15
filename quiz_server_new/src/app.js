@@ -7,6 +7,8 @@ const repoServ = require("./services/RepoService");
 const quizServ = require("./services/QuizService");
 const playerRouter = require("./routes/PlayerRouter");
 const repoRouter = require("./routes/RepoRouter");
+const tagRouter = require('./routes/TagRouter');
+const quizRouter = require('./routes/QuizRouter');
 const { expressjwt: jwt } = require("express-jwt");
 const { secretKey } = require("./common/sec");
 const {upload,download} = require('./common/dbContext')
@@ -41,6 +43,8 @@ app.all("*", function (req, res, next) {
 
 app.use(playerRouter);
 app.use(repoRouter);
+app.use(tagRouter);
+app.use(quizRouter);
 
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development

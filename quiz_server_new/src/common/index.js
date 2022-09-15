@@ -30,9 +30,18 @@ function randomString(len) {
     return n
 }
 
+function checkUserValid(req) {
+    const id = req.auth.id;
+    if (id < 1) {
+      return new Error(`用户验证失败，id：${id}`);
+    }
+    return id;
+}
+
 module.exports = {
     objfy,
     defineMaxId,
     getOrigin,
-    randomString
+    randomString,
+    checkUserValid
 }

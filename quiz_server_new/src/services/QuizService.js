@@ -1,5 +1,9 @@
 const Quiz = require("../daos/Quiz");
+const TagQuizs = require('../daos/TagQuizs');
+const {dbContext} = require('../common/dbContext')
+const tagServ = require('./TagService');
 const { Op } = require("sequelize");
+const Tag = require("../daos/Tag");
 
 async function findAll() {
   try {
@@ -64,21 +68,59 @@ async function belongsTo({ id }) {
   }
 }
 
-async function insert({ question, answer, importance, level },repoId) {
+async function insert({ question, answer,references, importance, level },repoId,tags,playerId) {
   try {
-    const maxId = await Quiz.maxId;
-    const quiz = await Quiz.create({
-      id: maxId + 1,
-      question,
-      answer,
-      importance,
-      level,
-      repoId
-    });
-    if (quiz === null) {
-      throw new Error("create a new quiz error!");
+    if (!importance) {
+      importance = "unknown";
     }
-    return quiz;
+    if (!level) {
+      level = "unknown";
+    }
+    if (!references) {
+      references = "";
+    }
+    const maxId = await Quiz.maxId;
+
+    const res = await dbContext.transaction(async (t)=>{
+      //检查每个tag是否都已存在数据库中，若不存在，则插入
+      for (let i = 0; i < tags.length; i++) {
+        let result = await tagServ.findByName(tags[i]);
+          if (!result) {
+              let tmpTag = await tagServ.insert(tags[i]);
+              if (!tmpTag) {
+                throw new Error('create tag error!');
+              }
+          }
+      }
+      //插入quiz表
+      const quiz = await Quiz.create({
+        id: maxId + 1,
+        question,
+        answer,
+        importance,
+        level,
+        references,
+        repoId
+      },{transaction:t});
+      if (quiz === null) {
+        throw new Error("create a new quiz error!");
+      }
+
+      //把quiz跟tags进项关联，顺便插入user方便以后的查询
+      const quizId = quiz.getDataValue('id');
+      for (let i = 0; i < tags.length; i++) {
+        let curTag = await tagServ.findByName(tags[i]);
+        await TagQuizs.create({
+          quizId,
+          tagId:curTag.getDataValue('id'),
+          playerId
+        },{transaction:t})
+      }
+
+      return quiz;
+    })
+
+    return res;
   } catch (error) {
     console.error(`insert err:${error},question:${question}`);
   }
@@ -110,6 +152,20 @@ async function update({ id, question, answer, importance, level }) {
   }
 }
 
+async function getTags({id}){
+  try {
+    let quiz = await Quiz.findAll({
+      where:{id},
+      include:{
+        model:Tag
+      }
+    })
+    return quiz[0].tags;
+  } catch (error) {
+    console.error(`getTags err:${error},id:${id}`);
+  }
+}
+
 module.exports = {
   findAll,
   findById,
@@ -117,5 +173,6 @@ module.exports = {
   belongsTo,
   removeById,
   update,
-  insert
+  insert,
+  getTags
 };

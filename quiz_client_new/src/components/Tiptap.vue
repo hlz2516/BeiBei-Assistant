@@ -228,7 +228,6 @@ export default {
       }
     },
     openSubMenu(event, type) {
-      console.dir(this.$refs["tiptap-container"]);
       this.$refs.menu.style.setProperty(
         "left",
         event.target.offsetLeft -
@@ -325,7 +324,7 @@ export default {
   },
   mounted() {
     this.editor = new Editor({
-      content: "<p>I’m running Tiptap with Vue.js. 🎉</p>",
+      content: "<p>在这里输入答案</p>",
       extensions: [
         StarterKit.configure({
           codeBlock: {
@@ -333,6 +332,16 @@ export default {
               class: "code-block",
             },
           },
+          bulletList:{
+            HTMLAttributes:{
+              class:"bullet-list"
+            }
+          },
+          orderedList:{
+            HTMLAttributes:{
+              class:"ordered-list"
+            }
+          }
         }),
         BubbleMenu,
         Underline,
@@ -350,16 +359,16 @@ export default {
       ],
       editorProps: {
         attributes: {
-          class: "prose",
+          class: "prose"
         },
       },
       onUpdate:()=>{
-        this.$emit('input',this.editor.getHTML())
+        this.$emit('update:modelValue', this.editor.getHTML())
       }
     });
   },
   watch: {
-    value(value) {
+    modelValue(value) {
       // HTML
       const isSame = this.editor.getHTML() === value
  
@@ -374,12 +383,14 @@ export default {
     },
   },
   props:{
-    value:{
+    modelValue:{
       type:String,
       default:''
     }
   },
-  beforeDestroy() {
+  emits: ['update:modelValue'],
+
+  beforeUnmount() {
     this.editor.destroy();
   },
 };
@@ -499,5 +510,15 @@ div >>> .code-block {
   color: #fff;
   font-size: 14px;
   line-height: 18px;
+}
+
+div >>> .bullet-list{
+  list-style-type: disc;
+  margin-left: 8px;
+}
+
+div >>> .ordered-list{
+  list-style-type: decimal;
+  margin-left: 8px;
 }
 </style>
