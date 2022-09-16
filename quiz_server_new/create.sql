@@ -33,10 +33,10 @@ create table quiz(
     -- tags char(64) not null,
     -- 回答的参考链接
     `references` varchar(256),
-    -- 题目的重要程度，出题时决定 可选字符串 'important' 'understand' 'know' 'unknown'
-    importance char(16) default 'unknown',
-    -- 自己的记忆程度，可选字符串 'familiar' 'understand' 'hard' 'unknown',其中unknown是在数据库中还没抽到(背过)的题
-    level char(16) default 'unknown',
+    -- 题目的重要程度，出题时决定 可选字符串:'重要' '理解' '了解' '未知'
+    importance char(16) default '未知',
+    -- 自己的记忆程度，可选字符串:'已熟悉' '已理解' '不理解' '未知',其中未知是在数据库中还没抽到(背过)的题
+    level char(16) default '未知',
     -- 最后一次更新理解程度的时间，在出题时就必须登记
     last_time Timestamp null,
     destroy_time Timestamp null

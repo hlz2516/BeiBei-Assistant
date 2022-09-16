@@ -4,6 +4,7 @@ import LoginPage from '../pages/LoginPage.vue';
 import GeneralPage from '../pages/GeneralPage.vue';
 import RepoPage from '../pages/RepoPage.vue';
 import NewQuizPage from '../pages/NewQuizPage.vue';
+import RemQuizPage from '../pages/RemQuizPage.vue';
 
 const routes = [
   {
@@ -20,6 +21,11 @@ const routes = [
     path:'/newQuiz',
     name:'newQuiz',
     component:NewQuizPage
+  },
+  {
+    path:'/remQuiz',
+    name:'remQuiz',
+    component:RemQuizPage
   },
   {
     path:'/general',

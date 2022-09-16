@@ -148,6 +148,18 @@ async function updateOrigin({id,origin}){
   }
 }
 
+async function getQuizs({id}){
+  try {
+    let repo = await Repo.findAll({
+      where: { id },
+      include: Quiz,
+    });
+    return repo[0].quizzes;
+  } catch (error) {
+    console.error(`getQuizs err:${error},id:${id}`);
+  }
+}
+
 async function getQuizCount(id){
   try {
     let repo = await Repo.findAll({
@@ -170,5 +182,6 @@ module.exports = {
   removeByName,
   updateName,
   updateOrigin,
-  getQuizCount
+  getQuizCount,
+  getQuizs
 };

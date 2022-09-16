@@ -19,7 +19,7 @@
           >
             <ListItemMeta
               :title="data.question.substr(0, 15)"
-              :description="data.answer.substr(0, 20)"
+              :description="beautifyDesc(data.answer)"
             />
           </ListItem>
         </List>
@@ -123,9 +123,13 @@
     <card class="right-layout">
       <!-- 说明如何搜索 -->
       <template v-slot:title>
-        <h3>搜索规则说明</h3>
+        <h2>规则说明</h2>
       </template>
-      <p>目前仅支持快速搜索，只需输入关键词即可，优先按照id，问题/答案，标签名进行查找</p>
+      <h3>搜索的书写规则</h3>
+      <p>目前仅支持快速搜索，只需输入关键词即可，优先按照id，问题/答案，题库名，标签名进行查找</p>
+      <h3>参考链接的书写规则</h3>
+      <p>格式：[标题1](链接地址1),[标题2](链接地址2)...</p>
+      <p>例如：[typeof与instanceof的区别](https:www.xxx.com/article?xxx=yyy)</p>
     </card>
   </div>
 </template>
@@ -188,6 +192,10 @@ export default {
       });
       this.quiz.tags = tags;
     },
+    beautifyDesc(value){
+      value = value.replace(/<\/*\w+>/gi,'');
+      return value.substr(0,20);
+    },
     getSearchValue(value) {
       this.searchText = value;
     },
@@ -216,6 +224,9 @@ export default {
     addTag() {
       if (this.tagText == "") return;
       if (this.quiz.tags.length >= 5) return;
+      if (this.quiz.tags.indexOf(this.tagText) > -1)
+        return;
+
       this.quiz.tags.push(this.tagText);
       this.tagText = "";
     },
@@ -245,8 +256,9 @@ export default {
         return;
       }
       this.submitDisabled = true;
-      //提交请求
-      request
+      if (this.quiz.id === 0) {
+        //新建题目
+        request
         .post("/quiz/add", {
           id: this.quiz.id,
           question: this.quiz.question,
@@ -267,6 +279,31 @@ export default {
           this.$Notice.error({ title: "提交失败！", desc: reason });
           this.submitDisabled = false;
         });
+      }
+      else{
+        console.log('走更新..');
+        //更新题目
+        request.post('/quiz/update',{
+          id: this.quiz.id,
+          question: this.quiz.question,
+          answer: this.quiz.answer,
+          references: this.quiz.references,
+          tags: this.quiz.tags,
+          importances: this.quiz.curImp,
+          repo: this.quiz.curRepo,
+        })
+        .then((result) => {
+          if (result.status === 200) {
+            this.$Notice.info({ desc: "已成功更新！" });
+            this.submitDisabled = false;
+          }
+        })
+        .catch((reason) => {
+          this.$Notice.error({ title: "更新失败！", desc: reason });
+          this.submitDisabled = false;
+        });
+      }
+      
     },
     reset() {
       this.quiz = {

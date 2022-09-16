@@ -27,7 +27,7 @@
               <Icon type="md-bulb" />
               出 题
             </MenuItem>
-            <MenuItem name="remQues">
+            <MenuItem name="remQues" to="remQuiz">
               <Icon type="md-play" />
               背 题
             </MenuItem>
@@ -35,9 +35,9 @@
               <Icon type="md-pulse" />
               概 况
             </MenuItem>
-            <MenuItem name="setup">
-              <Icon type="md-settings" />
-              设 置
+            <MenuItem name="sponsor">
+              <Icon type="md-heart-outline" />
+              赞 助
             </MenuItem>
           </div>
         </Menu>
