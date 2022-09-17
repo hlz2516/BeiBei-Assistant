@@ -36,7 +36,7 @@ router.post("/login", async (req, res, next) => {
     const tokenStr = jwt.sign(
       { id: player.dataValues["id"], name: player.dataValues["name"] },
       secretKey,
-      { expiresIn: "6h" }
+      { expiresIn: "720h" }
     );
     res.status(200).json({
       msg: "log in success",

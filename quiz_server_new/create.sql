@@ -1,15 +1,15 @@
 drop table if exists tag;
 create table tag(
     id int primary key auto_increment,
-    name char(16) unique not null,
+    `name` char(16) unique not null,
     destroy_time Timestamp null
 );
 
 drop table if exists player;
 create table player(
     id int primary key auto_increment,
-    name varchar(16) unique not null,
-    password varchar(36) not null,
+    `name` varchar(16) unique not null,
+    `password` varchar(36) not null,
     destroy_time Timestamp null
 );
 
@@ -17,10 +17,10 @@ drop table if exists repo;
 create table repo(
     id int primary key auto_increment,
     playerId int references player(id),
-    name varchar(32) not null,
+    `name` varchar(32) not null,
     origin char(6) default '',
     destroy_time Timestamp null,
-    unique index(playerId,name)
+    unique index(playerId,`name`)
 );
 
 drop table if exists quiz;
@@ -36,7 +36,7 @@ create table quiz(
     -- 题目的重要程度，出题时决定 可选字符串:'重要' '理解' '了解' '未知'
     importance char(16) default '未知',
     -- 自己的记忆程度，可选字符串:'已熟悉' '已理解' '不理解' '未知',其中未知是在数据库中还没抽到(背过)的题
-    level char(16) default '未知',
+    `level` char(16) default '未知',
     -- 最后一次更新理解程度的时间，在出题时就必须登记
     last_time Timestamp null,
     destroy_time Timestamp null
@@ -57,7 +57,7 @@ drop table if exists pub_repo;
 create table pub_repo(
     id int primary key auto_increment,
     code char(6) unique not null,
-    name varchar(32) unique not null 
+    `name` varchar(32) unique not null 
 );
 
 drop table if exists pub_quiz;
@@ -70,24 +70,24 @@ create table pub_quiz(
     tags json
 );
 
-insert into player(`name`,`password`) values('tom','dc483e80a7a0bd9ef71d8cf973673924');
+-- insert into player(`name`,`password`) values('tom','dc483e80a7a0bd9ef71d8cf973673924');
 
-insert into repo(`name`,playerId) values('前端',1);
+-- insert into repo(`name`,playerId) values('前端',1);
 
-insert into quiz(question,answer,repoId) values('ques','ans',1);
-insert into quiz(question,answer,repoId) values('ques1','ans1',1);
-insert into quiz(question,answer,repoId) values('ques2','ans2',1);
+-- insert into quiz(question,answer,repoId) values('ques','ans',1);
+-- insert into quiz(question,answer,repoId) values('ques1','ans1',1);
+-- insert into quiz(question,answer,repoId) values('ques2','ans2',1);
 
-insert into tag(`name`) values('java');
-insert into tag(`name`) values('C#');
-insert into tag(`name`) values('php');
-insert into tag(`name`) values('node');
-insert into tag(`name`) values('javascript');
+-- insert into tag(`name`) values('java');
+-- insert into tag(`name`) values('C#');
+-- insert into tag(`name`) values('php');
+-- insert into tag(`name`) values('node');
+-- insert into tag(`name`) values('javascript');
 
 
-insert into tagquizs(quizId,tagId) values(1,1);
-insert into tagquizs(quizId,tagId) values(1,2);
-insert into tagquizs(quizId,tagId) values(1,3);
-insert into tagquizs(quizId,tagId) values(2,4);
-insert into tagquizs(quizId,tagId) values(2,5);
-insert into tagquizs(quizId,tagId) values(2,6);
+-- insert into tagquizs(quizId,tagId) values(1,1);
+-- insert into tagquizs(quizId,tagId) values(1,2);
+-- insert into tagquizs(quizId,tagId) values(1,3);
+-- insert into tagquizs(quizId,tagId) values(2,4);
+-- insert into tagquizs(quizId,tagId) values(2,5);
+-- insert into tagquizs(quizId,tagId) values(2,6);

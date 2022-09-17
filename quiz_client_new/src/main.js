@@ -12,3 +12,5 @@ app.use(store)
   .use(router)
   .use(ViewUIPlus)
   .mount('#app')
+
+  console.log(process.env);

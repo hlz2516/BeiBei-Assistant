@@ -29,20 +29,20 @@ const config = {
       ]
     }
   },
-  devServer: {
-    open: true,
-    port: 8080,
-    host: 'localhost',
-    proxy: {
-      '/api': {
-        target: 'http://localhost:9000',
-        changeOrigin: true,
-        pathRewrite: {
-          "^/api": "",
-        },
-      }
-    }
-  },
+  // devServer: {
+  //   open: true,
+  //   port: 8080,
+  //   host: 'localhost',
+  //   proxy: {
+  //     '/api': {
+  //       target: process.env.VUE_APP_SERVER_ADDR,
+  //       changeOrigin: true,
+  //       pathRewrite: {
+  //         "^/api": "",
+  //       },
+  //     }
+  //   }
+  // },
   lintOnSave:false
 }
 

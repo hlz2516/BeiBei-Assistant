@@ -5,9 +5,11 @@ const quizServ = require("../services/QuizService");
 const tagServ = require("../services/TagService");
 const TagQuizs = require("../daos/TagQuizs");
 const { checkUserValid, objfy } = require("../common");
-const Quiz = require("../daos/Quiz");
-const Tag = require("../daos/Tag");
-const {remCoreQuery,findTagsName} = require('../common/dbContext')
+const {
+  remCoreQuery,
+  findTagsName,
+  findQuizByLevel,
+} = require("../common/dbContext");
 const router = express.Router();
 
 router.post("/quiz/add", async (req, res, next) => {
@@ -116,6 +118,29 @@ router.get("/quiz/quicksearch", async (req, res, next) => {
     const key = req.query["key"];
     const id = checkUserValid(req);
     const result = [];
+
+    if (key.startsWith("[") && key.endsWith("]")) {
+      let level = key.substring(1, key.length - 1);
+      //查找指定level的题目，不做题库等限制
+      let results = await findQuizByLevel(id, level);
+      for (let i = 0; i < results.length; i++) {
+        let quizId = results[i].id;
+        let tags = await findTagsName(quizId);
+        tags = tags.map((tag) => {
+          return tag.name;
+        });
+        results[i].tags = tags;
+        //result中每个quiz的repoid需转换成对应repo名返回回去
+        let repo = await repoServ.findById(results[i].repoId);
+        results[i].repoName = repo.getDataValue("name");
+      }
+      res.json({
+        data: results,
+        status: 200,
+      });
+      return;
+    }
+
     // console.log("key", key);
     //如果key是数字，那么会优先认为是一个quiz id
     if (!isNaN(key)) {
@@ -161,8 +186,11 @@ router.get("/quiz/quicksearch", async (req, res, next) => {
 
     for (let i = 0; i < result.length; i++) {
       //找到每个quiz的tags封装进去
-      let tags = await quizServ.getTags({ id: result[i].id });
-      result[i].tags = objfy(tags);
+      let tags = await findTagsName(result[i].id);
+      tags = tags.map((tag) => {
+        return tag.name;
+      });
+      result[i].tags = tags;
       //result中每个quiz的repoid需转换成对应repo名返回回去
       let repo = await repoServ.findById(result[i].repoId);
       result[i].repoName = repo.getDataValue("name");
@@ -196,45 +224,66 @@ router.get("/quiz/rem", async (req, res, next) => {
     } else imps.push(imp);
 
     if (tagName === "全部") {
-        tagName = null;
+      tagName = null;
     }
 
     // console.log("tags", tags);
     // console.log("imps", imps);
 
-    let repoModel = await repoServ.findByName(repoName,userId);
+    let repoModel = await repoServ.findByName(repoName, userId);
     const repoId = repoModel.getDataValue("id");
     // console.log('repoId',repoId);
     //根据条件找熟悉的
-    let familiarRes = await remCoreQuery(userId,repoId,imps,"已熟悉",planFamiliared,tagName);
+    let familiarRes = await remCoreQuery(
+      userId,
+      repoId,
+      imps,
+      "已熟悉",
+      planFamiliared,
+      tagName
+    );
     //查出来的是quiz表内部不带tags，所以我们要自己找
     for (let i = 0; i < familiarRes.length; i++) {
-        let famTags = await findTagsName(familiarRes[i].id);
-        familiarRes[i].tags = famTags;
+      let famTags = await findTagsName(familiarRes[i].id);
+      familiarRes[i].tags = famTags;
     }
     data.push(...familiarRes);
     // console.log('familiarRes',familiarRes.length);
     //如果查到的记录条数不满足预期，那么在预期的未知记录上加上该差值
     if (familiarRes.length < planFamiliared) {
-        planUnknowned += (planFamiliared - familiarRes.length);
+      planUnknowned += planFamiliared - familiarRes.length;
     }
     //根据条件找理解的
-    let understoodRes = await remCoreQuery(userId,repoId,imps,"已理解",planUnderstood,tagName);
+    let understoodRes = await remCoreQuery(
+      userId,
+      repoId,
+      imps,
+      "已理解",
+      planUnderstood,
+      tagName
+    );
     for (let i = 0; i < understoodRes.length; i++) {
-        let undTags = await findTagsName(understoodRes[i].id);
-        understoodRes[i].tags = undTags;
+      let undTags = await findTagsName(understoodRes[i].id);
+      understoodRes[i].tags = undTags;
     }
     data.push(...understoodRes);
     // console.log('understoodRes',understoodRes.length);
     //对于已理解查到的记录数同理
     if (understoodRes.length < planUnderstood) {
-        planUnknowned += (planUnderstood - understoodRes.length);
+      planUnknowned += planUnderstood - understoodRes.length;
     }
     //根据条件查未知的
-    let unknownRes = await remCoreQuery(userId,repoId,imps,"未知",planUnknowned,tagName);
+    let unknownRes = await remCoreQuery(
+      userId,
+      repoId,
+      imps,
+      "未知",
+      planUnknowned,
+      tagName
+    );
     for (let i = 0; i < unknownRes.length; i++) {
-        let unkTags = await findTagsName(unknownRes[i].id);
-        unknownRes[i].tags = unkTags;
+      let unkTags = await findTagsName(unknownRes[i].id);
+      unknownRes[i].tags = unkTags;
     }
     data.push(...unknownRes);
     // console.log('unknownRes',unknownRes.length);
@@ -247,5 +296,21 @@ router.get("/quiz/rem", async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/quiz/del',async (req,res,next)=>{
+  try {
+    let quizId = req.body['quizId'];
+    //在tagquizs表中找到该quizId，删除
+    let result = await quizServ.removeById(quizId);
+    if (result===0) {
+      res.json({
+        msg:'OK',
+        status:200
+      })
+    }
+  } catch (error) {
+    next(error);
+  }
+})
 
 module.exports = router;

@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-/dist
+public
 /src/common/dbConfig.js
 
 # local env files

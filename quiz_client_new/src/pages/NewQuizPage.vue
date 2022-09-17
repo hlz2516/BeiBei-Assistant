@@ -117,6 +117,13 @@
             >提交</Button
           >
           <Button type="info" @click="reset">重置</Button>
+          <Tooltip content="注意，该选项会删除数据库中对应的题目，请谨慎操作！" placement="top" max-width="100px">
+            <Button type="error" @click="handleDelete">删除</Button>
+          </Tooltip>
+
+          <Tooltip content="注意，该选项会重置该题目的熟练度为未知，请谨慎操作！" placement="top" max-width="100px">
+            <Button type="warning" @click="handleResetLevel">重置熟练度</Button>
+          </Tooltip>
         </div>
       </div>
     </card>
@@ -127,6 +134,9 @@
       </template>
       <h3>搜索的书写规则</h3>
       <p>目前仅支持快速搜索，只需输入关键词即可，优先按照id，问题/答案，题库名，标签名进行查找</p>
+      <p>快速搜索支持对于题目熟练度的特殊搜索，你可以搜索已熟悉的，已理解的，或不理解的题目，其搜索规则如下：</p>
+      <p>[熟练度]</p>
+      <p>熟练度的可选值：已熟悉，已理解，不理解</p>
       <h3>参考链接的书写规则</h3>
       <p>格式：[标题1](链接地址1),[标题2](链接地址2)...</p>
       <p>例如：[typeof与instanceof的区别](https:www.xxx.com/article?xxx=yyy)</p>
@@ -187,9 +197,7 @@ export default {
       this.quiz.curImp = this.result.data[index].importance;
       this.quiz.curRepo = this.result.data[index].repoName;
       //对tags做特殊处理
-      let tags = this.result.data[index].tags.map((tag) => {
-        return tag.name;
-      });
+      let tags = this.result.data[index].tags;
       this.quiz.tags = tags;
     },
     beautifyDesc(value){
@@ -236,23 +244,23 @@ export default {
     submit() {
       //先检查必填项是否都填写完善
       if (this.quiz.question == "") {
-        this.$Modal.info({ content: "请输入问题" });
+        this.$Modal.warning({ title: "请输入问题" });
         return;
       }
       if (this.quiz.answer.length < 10) {
-        this.$Modal.info({ content: "回答字数过少，请重新组织语言" });
+        this.$Modal.warning({ title: "回答字数过少，请重新组织语言" });
         return;
       }
       if (this.quiz.tags.length < 1) {
-        this.$Modal.info({ content: "请至少选择一个标签！" });
+        this.$Modal.warning({ title: "请至少选择一个标签！" });
         return;
       }
-      if (this.quiz.curRepo == "") {
-        this.$Modal.info({ content: "请选择题库！" });
+      if (!this.quiz.curRepo || this.quiz.curRepo == "") {
+        this.$Modal.warning({ title: "请选择题库！" });
         return;
       }
-      if (this.quiz.curImp == "") {
-        this.$Modal.info({ content: "请选择重要程度！" });
+      if (!this.quiz.curImp || this.quiz.curImp == "") {
+        this.$Modal.warning({ title: "请选择重要程度！" });
         return;
       }
       this.submitDisabled = true;
@@ -271,17 +279,17 @@ export default {
         .then((result) => {
           if (result.status === 200) {
             this.quiz.id = result.quizId;
-            this.$Notice.info({ desc: "已成功提交！" });
+            this.$Notice.success({ title: "已成功提交！" });
             this.submitDisabled = false;
           }
         })
-        .catch((reason) => {
-          this.$Notice.error({ title: "提交失败！", desc: reason });
+        .catch((error) => {
+          this.$Notice.error({ title: "提交失败！" });
           this.submitDisabled = false;
+          console.error(error);
         });
       }
       else{
-        console.log('走更新..');
         //更新题目
         request.post('/quiz/update',{
           id: this.quiz.id,
@@ -294,12 +302,12 @@ export default {
         })
         .then((result) => {
           if (result.status === 200) {
-            this.$Notice.info({ desc: "已成功更新！" });
+            this.$Notice.success({ title: "已成功更新！" });
             this.submitDisabled = false;
           }
         })
         .catch((reason) => {
-          this.$Notice.error({ title: "更新失败！", desc: reason });
+          this.$Notice.error({ title: "更新失败！" });
           this.submitDisabled = false;
         });
       }
@@ -317,6 +325,52 @@ export default {
       };
       this.tagText = "";
     },
+    handleDelete(){
+      if (this.quiz.id === 0) {
+        this.$Modal.warning({
+          title:'请指定数据库中已存在的题目后再进行删除！'
+        })
+        return;
+      }
+
+      request.post('/quiz/del',{
+        quizId:this.quiz.id
+      })
+      .then(resp=>{
+        if(resp.status === 200){
+          this.$Notice.success({
+            title:'已在数据库中删除该题目'
+          });
+          this.reset();
+        }
+      })
+    },
+    handleResetLevel(){
+      if (this.quiz.id === 0) {
+        this.$Modal.warning({
+          title:'请指定数据库中已存在的题目后再重置熟练度！'
+        })
+        return;
+      }
+
+      request.post('/quiz/setlevel',{
+        quizId:this.quiz.id,
+        level:'未知'
+      })
+      .then(resp=>{
+        if(resp.status === 200){
+          this.$Notice.success({
+            title:'已重置该题目的熟练度为未知'
+          })
+        }
+      })  
+      .catch(error=>{
+        console.error(error);
+        this.$Notice.error({
+            title:'重置熟练度失败！'
+          })
+      })
+    }
   },
   mounted() {
     request.get("/tags").then((result) => {

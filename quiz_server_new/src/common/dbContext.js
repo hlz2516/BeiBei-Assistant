@@ -51,7 +51,8 @@ async function download(playerId,code) {
 
 async function findTagsName(quizId){
   try {
-    const results =  await dbContext.query('select t.name from tag t,tagquizs tq where t.id = tq.tagId and tq.quizId = ? and tq.destroy_time is NULL;',
+    const results =  await dbContext.query(`select t.name from tag t,tagquizs tq where
+     t.id = tq.tagId and tq.quizId = ? and tq.destroy_time is null and t.destroy_time is null;`,
     {
       replacements:[quizId],
       type:QueryTypes.SELECT
@@ -71,7 +72,7 @@ async function remCoreQuery(playerId,repoId,importance,level,limited,tag){
       
     // }
     if (!tag) {
-      sqlStr = `select * from quiz where repoId = ? and importance in (?) and level = ? limit ?`;
+      sqlStr = `select * from quiz where repoId = ? and importance in (?) and level = ? and destroy_time is null limit ?`;
       console.log('no tags');
       results =  await dbContext.query(sqlStr,
         {
@@ -83,7 +84,7 @@ async function remCoreQuery(playerId,repoId,importance,level,limited,tag){
       console.log('has tags');
       sqlStr = `select * from quiz where repoId = ? and importance in (?) and level = ? and 
       id in (select tq.quizId from tagquizs tq,tag t where tq.tagId = t.id and t.name = ?
-         and tq.playerId = ?)  limit ?`;
+         and tq.playerId = ? and t.destroy_time is null) and destroy_time is null limit ?`;
       results =  await dbContext.query(sqlStr,
         {
           replacements:[repoId,importance,level,tag,playerId,limited],
@@ -98,11 +99,43 @@ async function remCoreQuery(playerId,repoId,importance,level,limited,tag){
   }
 }
 
+async function findQuizByLevel(playerId,level){
+  try {
+    const sqlStr = `select q.* from quiz q,tagquizs tq where q.id = tq.quizId and 
+    tq.playerId = ? and q.level = ? and q.destroy_time is null and tq.destroy_time is null`;
+    const results = dbContext.query(sqlStr,{
+      replacements:[playerId,level],
+      type:QueryTypes.SELECT
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function findTagsByRepo(repoId){
+  try {
+    const sqlStr = `select distinct t.name from quiz q,tagquizs tq,tag t where
+     q.Id = tq.quizId and q.repoId = ? and  tq.tagId = t.id and
+     q.destroy_time is null and t.destroy_time is null and tq.destroy_time is null
+    `;
+    const results = dbContext.query(sqlStr,{
+      replacements:[repoId],
+      type:QueryTypes.SELECT
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 module.exports = {
     dbContext,
     DataTypes,
     upload,
     download,
     findTagsName,
-    remCoreQuery
+    remCoreQuery,
+    findQuizByLevel,
+    findTagsByRepo
 };

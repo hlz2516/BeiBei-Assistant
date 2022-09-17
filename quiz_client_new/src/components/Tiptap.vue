@@ -24,19 +24,18 @@
         <template v-if="editor">
           <div class="inner">
             <button
-              @click="editor.chain().focus().unsetAllMarks().run()"
+              @click="editor.chain().focus().undo().run()"
               class="func-btn"
-              style="width: 80px"
             >
-              清除样式
+              撤销
             </button>
             <button
-              @click="editor.chain().focus().clearNodes().run()"
+              @click="editor.chain().focus().redo().run()"
               class="func-btn"
-              style="width: 80px"
             >
-              清除节点
+              恢复
             </button>
+
             <button @click="openSubMenu($event, 'heading')" class="func-btn">
               标题
             </button>
@@ -82,8 +81,20 @@
             >
               blockquote
             </button>
-            <button @click="setImage" class="func-btn">图片</button>
-
+            <button
+              @click="editor.chain().focus().unsetAllMarks().run()"
+              class="func-btn"
+              style="width: 80px"
+            >
+              清除样式
+            </button>
+            <button
+              @click="editor.chain().focus().clearNodes().run()"
+              class="func-btn"
+              style="width: 80px"
+            >
+              清除节点
+            </button>
             <button
               @click="editor.chain().focus().toggleBold().run()"
               class="func-btn"
@@ -128,23 +139,11 @@
             >
               强制换行
             </button>
-            <button
-              @click="editor.chain().focus().undo().run()"
-              class="func-btn"
-            >
-              撤销
-            </button>
-            <button
-              @click="editor.chain().focus().redo().run()"
-              class="func-btn"
-            >
-              恢复
-            </button>
           </div>
         </template>
       </div>
     </div>
-    <hr>
+    <hr />
     <div class="input-part" @click.self="editor.commands.focus('end')">
       <bubble-menu
         :editor="editor"
@@ -332,16 +331,16 @@ export default {
               class: "code-block",
             },
           },
-          bulletList:{
-            HTMLAttributes:{
-              class:"bullet-list"
-            }
+          bulletList: {
+            HTMLAttributes: {
+              class: "bullet-list",
+            },
           },
-          orderedList:{
-            HTMLAttributes:{
-              class:"ordered-list"
-            }
-          }
+          orderedList: {
+            HTMLAttributes: {
+              class: "ordered-list",
+            },
+          },
         }),
         BubbleMenu,
         Underline,
@@ -359,36 +358,36 @@ export default {
       ],
       editorProps: {
         attributes: {
-          class: "prose"
+          class: "prose",
         },
       },
-      onUpdate:()=>{
-        this.$emit('update:modelValue', this.editor.getHTML())
-      }
+      onUpdate: () => {
+        this.$emit("update:modelValue", this.editor.getHTML());
+      },
     });
   },
   watch: {
     modelValue(value) {
       // HTML
-      const isSame = this.editor.getHTML() === value
- 
+      const isSame = this.editor.getHTML() === value;
+
       // JSON
       // const isSame = JSON.stringify(this.editor.getJSON()) === JSON.stringify(value)
- 
+
       if (isSame) {
-        return
+        return;
       }
- 
-      this.editor.commands.setContent(value, false)
+
+      this.editor.commands.setContent(value, false);
     },
   },
-  props:{
-    modelValue:{
-      type:String,
-      default:''
-    }
+  props: {
+    modelValue: {
+      type: String,
+      default: "",
+    },
   },
-  emits: ['update:modelValue'],
+  emits: ["update:modelValue"],
 
   beforeUnmount() {
     this.editor.destroy();
@@ -512,12 +511,12 @@ div >>> .code-block {
   line-height: 18px;
 }
 
-div >>> .bullet-list{
+div >>> .bullet-list {
   list-style-type: disc;
   margin-left: 8px;
 }
 
-div >>> .ordered-list{
+div >>> .ordered-list {
   list-style-type: decimal;
   margin-left: 8px;
 }

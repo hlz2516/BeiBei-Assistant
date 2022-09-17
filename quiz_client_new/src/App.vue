@@ -49,7 +49,7 @@
           <!-- </keep-alive> -->
         </router-view>
       </Content>
-      <Footer class="layout-footer-center">2011-2016 &copy; View Design</Footer>
+      <Footer class="layout-footer-center">Power by Vue 3 | 2011-2016 &copy; View Design</Footer>
     </Layout>
   </div>
 </template>
@@ -65,22 +65,22 @@ export default {
     let activedName = ref("login");
     //准备方法
     function handleSelect(name) {
-      // if (name === "login") {
-      //   return;
-      // }
-      // console.log('name',name);
-      // const token = localStorage.getItem("token");
-      // if (!token) {
-      //   //目前只能通过这种重置再改变的方式让active的样式生效
-      //   setTimeout(() => {
-      //     activedName.value = '';
-      //   }, 0);
-      //   setTimeout(() => {
-      //     activedName.value = 'login';
-      //   }, 0);
-      // } else {
-      //   activedName.value = name;
-      // }
+      if (name === "login") {
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        //目前只能通过这种重置再改变的方式让active的样式生效
+        setTimeout(() => {
+          activedName.value = '';
+        }, 0);
+        setTimeout(() => {
+          activedName.value = 'login';
+        }, 0);
+      } else {
+        activedName.value = name;
+      }
     }
 
     return {
@@ -93,7 +93,7 @@ export default {
     this.$router.replace("/login");
     const jwt = localStorage.getItem("token");
     if (jwt) {
-      console.log(jwt);
+      // console.log(jwt);
       let info = common.getInfoFromJwt(jwt.toString());
       info = JSON.parse(info);
       this.$store.dispatch("setUser", info);

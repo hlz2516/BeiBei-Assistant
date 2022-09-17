@@ -4,7 +4,6 @@ const { dbContext, findTagsName } = require("../common/dbContext");
 const tagServ = require("./TagService");
 const { Op } = require("sequelize");
 const Tag = require("../daos/Tag");
-const { objfy } = require("../common");
 const _ = require("loadsh");
 
 async function findAll() {
@@ -236,10 +235,21 @@ async function update(
 async function removeById(id) {
   try {
     let quiz = await findById(id);
-    if (quiz === null) {
-      return quiz;
-    }
-    return await quiz.destroy();
+    let res = dbContext.transaction(async (t)=>{
+      //先删除tagquizs关联表的相关内容
+      await TagQuizs.destroy({
+        where:{
+          quizId:id
+        },
+        transaction:t
+      });
+      //删除问题本身
+      await quiz.destroy({
+        transaction:t
+      });
+      return 0;
+    })
+    return res;
   } catch (error) {
     console.error(`remove err:${error},id:${id}`);
   }

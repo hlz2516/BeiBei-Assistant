@@ -8,7 +8,7 @@
         <!-- 题库选择 -->
         <div class="option-item">
           <label for="repo-selector">选择题库</label>
-          <Select v-model="options.repo" id="repo-selector">
+          <Select v-model="options.repo" id="repo-selector" @on-change="getCurRepo">
             <Option v-for="(repo, index) in repos" :value="repo" :key="index">{{
               repo
             }}</Option>
@@ -17,7 +17,7 @@
         <!-- 标签选择 -->
         <div class="option-item">
           <label for="tag-selector">选择标签</label>
-          <Select v-model="options.tag" id="rag-selector">
+          <Select v-model="options.tag" id="rag-selector" @on-open-change="tagSelectorOpen" >
             <Option v-for="(tag, index) in tags" :value="tag" :key="index">{{
               tag
             }}</Option>
@@ -150,8 +150,12 @@ export default {
   methods: {
     loadingQuizs() {
         if (!this.options.repo || this.options.repo == '') {
-            this.$Modal.info({content:'请选择题库！'});
+            this.$Modal.warning({title:'请选择题库！'});
             return
+        }
+        if (this.tags.length === 0) {
+          this.$Modal.warning({title:'请选择标签！'});
+          return
         }
 
         this.loadingCom = this.$Message.loading({
@@ -201,6 +205,39 @@ export default {
           }
         });
     },
+    getCurRepo(value){
+      request.get('/tags_in_repo',{
+        params:{
+          repoName:value
+        }
+      })
+      .then(resp=>{
+        if (resp.status === 200) {
+          this.tags = resp.data;
+          if (this.tags.length === 0) {
+            throw new Error(`该题库[${value}]的标签数为0`);
+          }
+          this.tags.push('全部');
+        }
+      })
+      .catch(error=>{
+        this.$Modal.error({
+          title:'获取题库的标签出现错误，请联系开发者'
+        });
+        console.error(error)
+      })
+    },
+    tagSelectorOpen(flag){
+      // console.log('flag',flag);
+      if (flag) {
+        if (this.options.repo == "") {
+          this.$Modal.warning({
+            title:'请先选择题库！'
+          })
+          return;
+        }
+      }
+    },
     giveup(){
         this.quizs = [];
         this.prepare = true;
@@ -223,13 +260,6 @@ export default {
     request.get("/repos/name").then((result) => {
       if (result.status === 200) {
         this.repos = result.repos;
-      }
-    });
-
-    request.get("/tags").then((result) => {
-      if (result.status === 200) {
-        this.tags = result.tags;
-        this.tags.push("全部");
       }
     });
   },
@@ -392,7 +422,6 @@ export default {
     .footer {
       width: 100%;
       flex: 2;
-      border: 1px solid khaki;
       display: flex;
       align-items: center;
       justify-content: space-around;

@@ -42,12 +42,12 @@ const router = createRouter({
   }
 })
 
-// router.beforeEach(async (to,from,next)=>{
-//   const token = localStorage.getItem('token');
-//   if (!token && to.name !== 'login') {
-//     return next('/login')
-//   }
-//   next();
-// })
+router.beforeEach(async (to,from,next)=>{
+  const token = localStorage.getItem('token');
+  if (!token && to.name !== 'login') {
+    return next('/login')
+  }
+  next();
+})
 
 export default router

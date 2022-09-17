@@ -2,7 +2,7 @@ import axios from 'axios';
 
 //参考尚品汇P16
 const request = axios.create({
-    baseURL:'/api',
+    baseURL:process.env.VUE_APP_SERVER_ADDR,
     timeout:5000
 })
 
