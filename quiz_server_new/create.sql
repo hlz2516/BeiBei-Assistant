@@ -57,7 +57,7 @@ drop table if exists pub_repo;
 create table pub_repo(
     id int primary key auto_increment,
     code char(6) unique not null,
-    `name` varchar(32) unique not null 
+    `name` varchar(32) not null 
 );
 
 drop table if exists pub_quiz;
@@ -70,24 +70,24 @@ create table pub_quiz(
     tags json
 );
 
--- insert into player(`name`,`password`) values('tom','dc483e80a7a0bd9ef71d8cf973673924');
+insert into player(`name`,`password`) values('tom','dc483e80a7a0bd9ef71d8cf973673924');
 
--- insert into repo(`name`,playerId) values('前端',1);
+insert into repo(`name`,playerId) values('前端',1);
 
--- insert into quiz(question,answer,repoId) values('ques','ans',1);
--- insert into quiz(question,answer,repoId) values('ques1','ans1',1);
--- insert into quiz(question,answer,repoId) values('ques2','ans2',1);
+insert into quiz(question,answer,repoId) values('ques','ans',1);
+insert into quiz(question,answer,repoId) values('ques1','ans1',1);
+insert into quiz(question,answer,repoId) values('ques2','ans2',1);
 
--- insert into tag(`name`) values('java');
--- insert into tag(`name`) values('C#');
--- insert into tag(`name`) values('php');
--- insert into tag(`name`) values('node');
--- insert into tag(`name`) values('javascript');
+insert into tag(`name`) values('java');
+insert into tag(`name`) values('C#');
+insert into tag(`name`) values('php');
+insert into tag(`name`) values('node');
+insert into tag(`name`) values('javascript');
 
 
--- insert into tagquizs(quizId,tagId) values(1,1);
--- insert into tagquizs(quizId,tagId) values(1,2);
--- insert into tagquizs(quizId,tagId) values(1,3);
--- insert into tagquizs(quizId,tagId) values(2,4);
--- insert into tagquizs(quizId,tagId) values(2,5);
--- insert into tagquizs(quizId,tagId) values(2,6);
+insert into tagquizs(quizId,tagId) values(1,1);
+insert into tagquizs(quizId,tagId) values(1,2);
+insert into tagquizs(quizId,tagId) values(1,3);
+insert into tagquizs(quizId,tagId) values(2,4);
+insert into tagquizs(quizId,tagId) values(2,5);
+insert into tagquizs(quizId,tagId) values(2,6);

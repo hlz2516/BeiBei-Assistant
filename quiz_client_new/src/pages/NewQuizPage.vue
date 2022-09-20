@@ -247,7 +247,9 @@ export default {
         this.$Modal.warning({ title: "请输入问题" });
         return;
       }
-      if (this.quiz.answer.length < 10) {
+      //统计大概字数
+      let content = this.quiz.answer.replace(/<\/?[a-z]+>/gi,'');
+      if (content.length < 10) {
         this.$Modal.warning({ title: "回答字数过少，请重新组织语言" });
         return;
       }
@@ -483,11 +485,10 @@ export default {
         .tags-input {
           flex: 2.5;
           display: flex;
-          justify-content: space-around;
+          justify-content: space-between;
           align-items: center;
           .add-sign {
             font-size: 24px;
-            transform: translate(-50%, 0);
             cursor: pointer;
           }
         }

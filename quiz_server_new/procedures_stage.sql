@@ -137,10 +137,17 @@ create procedure `interview_stage`.`download`(in player_id int,in code char(6))
         declare my_tags json default '[]';
         declare done int default 0;
         declare cur_id bigint;
+		declare ifdup default 0;
         declare cur_quiz cursor for select question,answer,importance,tags from pub_quiz where `code` = code;
         declare continue handler for not found set done = 1;
         
         select `name` into repo_name from pub_repo where `code` = code;
+		-- 检查该用户的题库中是否存在同名的题库，若存在，则在要插入的题库后添加后缀*
+		select count(*) into ifdup from repo where playerId = player_id and `name` = repo_name;
+		if ifdup > 0 then
+			repo_name = CONCAT(repo_name,'*');
+		end if;
+
         insert into repo(playerId,`name`,origin) values(player_id,repo_name,code); 
         select id into repo_id from repo where `playerId` = player_id and `name` = repo_name;
 
