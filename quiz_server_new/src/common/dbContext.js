@@ -101,7 +101,7 @@ async function remCoreQuery(playerId,repoId,importance,level,limited,tag){
 
 async function findQuizByLevel(playerId,level){
   try {
-    const sqlStr = `select q.* from quiz q,tagquizs tq where q.id = tq.quizId and 
+    const sqlStr = `select distinct q.* from quiz q,tagquizs tq where q.id = tq.quizId and 
     tq.playerId = ? and q.level = ? and q.destroy_time is null and tq.destroy_time is null`;
     const results = dbContext.query(sqlStr,{
       replacements:[playerId,level],

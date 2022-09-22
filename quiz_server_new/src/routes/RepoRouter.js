@@ -47,12 +47,18 @@ router.get("/repos/name",async (req,res,next)=>{
   }
 })
 
-router.post("/repoadd", async (req, res, next) => {
+router.post("/repo/add", async (req, res, next) => {
   try {
     const id = checkUserValid(req);
     const repoName = req.body["name"];
-    await repoServ.insert(repoName, id);
-
+    let result = await repoServ.insert(repoName, id);
+    if (!result) {
+      res.json({
+        msg:'插入失败',
+        status:503
+      });
+      return;
+    }
     res.json({
       msg: "OK",
       status: 200,
@@ -62,7 +68,7 @@ router.post("/repoadd", async (req, res, next) => {
   }
 });
 
-router.post('/repoedit',async (req,res,next)=>{
+router.post('/repo/edit',async (req,res,next)=>{
     try {
         const id = checkUserValid(req);
         let oldName = req.body['oldName'];
@@ -78,15 +84,15 @@ router.post('/repoedit',async (req,res,next)=>{
         }else{
             res.json({
                 msg:'update error',
-                status:200
+                status:504
             })
         }
     } catch (error) {
         next(error)
     }
 })
-//准备测试该接口
-router.post('/repodownload',async (req,res,next)=>{
+
+router.post('/repo/download',async (req,res,next)=>{
   try {
     const userId = checkUserValid(req);
     const code = req.body['code'];
@@ -102,7 +108,7 @@ router.post('/repodownload',async (req,res,next)=>{
   }
 })
 
-router.post('/repoupload',async (req,res,next)=>{
+router.post('/repo/upload',async (req,res,next)=>{
   try {
     const userId = checkUserValid(req);
     const repoName = req.body['name'];

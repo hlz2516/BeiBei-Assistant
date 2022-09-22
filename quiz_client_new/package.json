@@ -22,6 +22,7 @@
     "axios": "^0.27.2",
     "chart.js": "^3.9.1",
     "core-js": "^3.8.3",
+    "moment": "^2.29.4",
     "view-ui-plus": "^1.1.0",
     "vue": "^3.2.13",
     "vue-chartjs": "^4.1.1",

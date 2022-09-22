@@ -9,8 +9,8 @@
         class="input-search"
         :placeholder="placeholder"
         ref="input"
-        :value="value"
-        @input="$emit('input', $event.target.value)"
+        :value="modelValue"
+        @input="$emit('update:modelValue', $event.target.value)"
         @keyup.enter="$emit('handle')"
         @focus="$emit('focustodo')"
         @blur="$emit('blurtodo')"
@@ -22,9 +22,9 @@
 <script>
 export default {
   name: "SearchBar",
-  emits:['input','handle','focustodo','blurtodo'],
+  emits:['handle','focustodo','blurtodo','update:modelValue'],
   props: {
-    value: String,
+    modelValue: String,
     width: String,
     height: String,
     "flex-w": String,

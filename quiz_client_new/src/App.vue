@@ -43,13 +43,15 @@
         </Menu>
       </Header>
       <Content :style="{ padding: '0 50px', margin: '30px 0' }">
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component }" v-if="isRouterAlive">
           <!-- <keep-alive> -->
             <component :is="Component" />
           <!-- </keep-alive> -->
         </router-view>
       </Content>
-      <Footer class="layout-footer-center">Power by Vue 3 | 2011-2016 &copy; View Design</Footer>
+      <Footer class="layout-footer-center">
+        <p>Powered by Express & Vue3 | Designed by View Design</p> 
+        </Footer>
     </Layout>
   </div>
 </template>
@@ -60,9 +62,15 @@ import common from "./common";
 
 export default {
   name: "App",
+  provide(){
+    return {
+      reload:this.reload
+    }
+  },
   setup() {
     //准备数据
     let activedName = ref("login");
+    let isRouterAlive = ref(true);
     //准备方法
     function handleSelect(name) {
       if (name === "login") {
@@ -83,9 +91,18 @@ export default {
       }
     }
 
+    function reload() {  
+      isRouterAlive.value = false;
+      this.$nextTick(()=>{
+        isRouterAlive.value = true;
+      })
+    }
+
     return {
       activedName,
-      handleSelect
+      isRouterAlive,
+      handleSelect,
+      reload
     }
   },
 

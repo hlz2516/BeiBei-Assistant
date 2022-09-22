@@ -5,7 +5,7 @@ const Tag = require("./Tag");
 const Player = require("./Player");
 
 
-const TagQuizs = dbContext.define("tagquizs", {
+const TagQuizs = dbContext.define("TagQuiz", {
   tagId: {
     type: DataTypes.INTEGER,
     references: {

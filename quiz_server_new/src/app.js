@@ -5,8 +5,10 @@ const playerRouter = require("./routes/PlayerRouter");
 const repoRouter = require("./routes/RepoRouter");
 const tagRouter = require('./routes/TagRouter');
 const quizRouter = require('./routes/QuizRouter');
+const pubRepoRouter = require('./routes/PubRepoRouter');
 const { expressjwt: jwt } = require("express-jwt");
 const { secretKey } = require("./common/sec");
+const pubRepoServ = require('./services/PubRepoService');
 
 let port = 9000;
 if (process.env.NODE_ENV === 'production') {
@@ -44,6 +46,7 @@ app.use(playerRouter);
 app.use(repoRouter);
 app.use(tagRouter);
 app.use(quizRouter);
+app.use(pubRepoRouter);
 
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
@@ -61,11 +64,11 @@ app.listen(port, () => {
   console.log(`[interview king] is listening on port ${port}`);
 });
 
-//test
+//调试测试代码时，把app.listen注释掉，把下面的代码开启
 // async function doSth(){
 //    try {
-//      const result = await upload(36,'aabbdd');
-//      console.log('result',result);
+//      let res = await pubRepoServ.findAll();
+//      console.log('res',res);
 //    } catch (error) {
 //     console.log('dosth error:',error);
 //    }

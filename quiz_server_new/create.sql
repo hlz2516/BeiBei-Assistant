@@ -57,7 +57,10 @@ drop table if exists pub_repo;
 create table pub_repo(
     id int primary key auto_increment,
     code char(6) unique not null,
-    `name` varchar(32) not null 
+    `name` varchar(32) not null,
+    creator varchar(16) not null,
+    download_time int default 0,
+    create_time Timestamp not null
 );
 
 drop table if exists pub_quiz;
@@ -66,7 +69,7 @@ create table pub_quiz(
     code char(6) not null references pub_repo(code),
     question varchar(128) not null,
     answer varchar(2048) not null,
-    importance char(16) default 'unknown',
+    importance char(16) default '未知',
     tags json
 );
 
@@ -85,9 +88,9 @@ insert into tag(`name`) values('node');
 insert into tag(`name`) values('javascript');
 
 
-insert into tagquizs(quizId,tagId) values(1,1);
-insert into tagquizs(quizId,tagId) values(1,2);
-insert into tagquizs(quizId,tagId) values(1,3);
-insert into tagquizs(quizId,tagId) values(2,4);
-insert into tagquizs(quizId,tagId) values(2,5);
-insert into tagquizs(quizId,tagId) values(2,6);
+insert into tagquizs(quizId,tagId,playerId) values(1,1,1);
+insert into tagquizs(quizId,tagId,playerId) values(1,2,1);
+insert into tagquizs(quizId,tagId,playerId) values(1,3,1);
+insert into tagquizs(quizId,tagId,playerId) values(2,4,1);
+insert into tagquizs(quizId,tagId,playerId) values(2,5,1);
+insert into tagquizs(quizId,tagId,playerId) values(2,6,1);
