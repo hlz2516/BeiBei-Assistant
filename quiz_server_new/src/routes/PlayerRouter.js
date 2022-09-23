@@ -13,13 +13,6 @@ router.post("/login", async (req, res, next) => {
     let player = await playerServ.findByName(name);
     if (!player) {
       player = await playerServ.insert(name, password);
-      if (!player) {
-        res.status(500).json({
-          status: 500,
-          msg: "create a player error,please contact developer",
-        });
-        return;
-      }
     } else {
       let pwdPassed = false;
       pwdPassed = await playerServ.checkPassword(player.dataValues, password);

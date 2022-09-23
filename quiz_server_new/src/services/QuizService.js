@@ -16,6 +16,7 @@ async function findAll() {
     }
   } catch (error) {
     console.log(`findAll err:${error}`);
+    throw error;
   }
 }
 
@@ -29,6 +30,7 @@ async function findById(id) {
     }
   } catch (error) {
     console.log(`findById err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -57,6 +59,7 @@ async function findByQuestionOrAnswer({ question, answer }) {
     }
   } catch (error) {
     console.log(`find err:${error},question:${question}},answer:${answer}`);
+    throw error;
   }
 }
 
@@ -66,6 +69,7 @@ async function belongsTo({ id }) {
     return await quiz.getRepo();
   } catch (error) {
     console.log(`find repo that belongs to err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -135,6 +139,7 @@ async function insert(
     return res;
   } catch (error) {
     console.error(`insert err:${error},question:${question}`);
+    throw error;
   }
 }
 
@@ -229,6 +234,7 @@ async function update(
     return res;
   } catch (error) {
     console.error(`update err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -252,6 +258,7 @@ async function removeById(id) {
     return res;
   } catch (error) {
     console.error(`remove err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -266,6 +273,7 @@ async function getTags({ id }) {
     return quiz[0].tags;
   } catch (error) {
     console.error(`getTags err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -280,6 +288,7 @@ async function updateLevel({id,level}){
     return quiz;
   } catch (error) {
     console.error(`updateLevel err:${error},id:${id},level:${level}`);
+    throw error;
   }
 }
 

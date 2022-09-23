@@ -13,6 +13,7 @@ async function findAll() {
     }
   } catch (error) {
     console.log(`findAll err:${error}`);
+    throw error;
   }
 }
 
@@ -26,6 +27,7 @@ async function findById(id) {
     }
   } catch (error) {
     console.log(`findById err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -45,6 +47,7 @@ async function findByName(name,playerId) {
     }
   } catch (error) {
     console.log(`findByName err:${error},name:${name},playerId:${playerId}`);
+    throw error;
   }
 }
 
@@ -55,6 +58,7 @@ async function belongsTo({ id }) {
     return player;
   } catch (error) {
     console.log(`find player that belongs to err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -72,6 +76,7 @@ async function insert(name, playerId) {
     return repo;
   } catch (error) {
     console.error(`insert err:${error},name:${name},playerId:${playerId}`);
+    throw error;
   }
 }
 //删除题库时，先删除题库内的所有题目，再删除本身
@@ -108,6 +113,7 @@ async function removeById(id) {
     return res;
   } catch (error) {
     console.error(`remove err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -117,6 +123,7 @@ async function removeByName(name) {
     return await removeById(id);
   } catch (error) {
     console.error(`remove err:${error},name:${name}`);
+    throw error;
   }
 }
 
@@ -131,6 +138,7 @@ async function updateName({ id, name }) {
     return effects;
   } catch (error) {
     console.error(`updateName err:${error},id:${id},name:${name}`);
+    throw error;
   }
 }
 
@@ -145,6 +153,7 @@ async function updateOrigin({id,origin}){
     return effects;
   } catch (error) {
     console.error(`updateOrigin err:${error},id:${id},origin:${origin}`);
+    throw error;
   }
 }
 
@@ -157,6 +166,7 @@ async function getQuizs({id}){
     return repo[0].quizzes;
   } catch (error) {
     console.error(`getQuizs err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -169,6 +179,7 @@ async function getQuizCount(id){
     return repo[0].quizzes.length;
   } catch (error) {
     console.error(`getQuizCount err:${error},id:${id}`);
+    throw error;
   }
 }
 

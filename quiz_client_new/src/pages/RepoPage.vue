@@ -60,8 +60,12 @@
           <strong>{{ row.name }}</strong>
         </template>
         <template #action="{ row }">
-          <Button type="primary" size="small" @click="download(row)"
+          <Button type="primary" size="small" @click="download(row)" style="margin-right:16px;"
             >下载</Button
+          >
+          
+          <Button type="warning" size="small" @click="checkOutComments(row)"
+            >评论</Button
           >
         </template>
       </Table>
@@ -106,14 +110,18 @@
     </p>
     <p>所以请确保上传的题库对他人具有一定的借鉴意义</p>
   </Modal>
+
+  <CommentsModal :showModel="commentsModal" @handleControl="handleControl" :repoCode="pubRepos.curRepo?pubRepos.curRepo.code:''" />
 </template>
 
 <script>
 import request from "../request";
 import moment from "moment";
+import CommentsModal from '../components/CommentsModal.vue';
 
 export default {
   name: "RepoPage",
+  components:{CommentsModal},
   inject: ["reload"],
   data() {
     return {
@@ -195,11 +203,14 @@ export default {
           // }
         ],
         filteredData: [],
+        myComment:'',
+        curRepo:null
       },
       newModal: false,
       delModal: false,
       impModal: false,
       upModal: false,
+      commentsModal:false,
       reqPri: null,
       reqPub: null,
       code: "",
@@ -354,6 +365,13 @@ export default {
     formatTime(t) {
       return moment(t).format("YYYY-MM-DD HH:mm:ss");
     },
+    checkOutComments(row){
+      this.pubRepos.curRepo = row;
+      this.commentsModal = true;
+    },
+    handleControl(){
+      this.commentsModal = ! this.commentsModal;
+    }
   },
   created() {
     //发送数据请求

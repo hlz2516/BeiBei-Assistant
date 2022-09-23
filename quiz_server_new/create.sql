@@ -58,9 +58,19 @@ create table pub_repo(
     id int primary key auto_increment,
     code char(6) unique not null,
     `name` varchar(32) not null,
-    creator varchar(16) not null,
+    creator varchar(16) not null references player(`name`),
     download_time int default 0,
     create_time Timestamp not null
+);
+
+drop table if exists pub_comment;
+create table pub_comment(
+    id int primary key auto_increment,
+    code char(6) not null references pub_repo(code),
+    commenter varchar(16) not null references player(`name`),
+    -- 每条评论字数不能超过200
+    comment varchar(200) not null,
+    create_time Timestamp not null 
 );
 
 drop table if exists pub_quiz;

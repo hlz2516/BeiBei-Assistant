@@ -1,8 +1,9 @@
 const { dbContext, DataTypes } = require("../common/dbContext");
 const {defineMaxId} = require('../common');
+const PubRepo = require('./PubRepo');
 const Player = require("./Player");
 
-const PubRepo = dbContext.define('PubRepo',{
+const PubComment = dbContext.define('PubComment',{
     id:{
         type:DataTypes.INTEGER,
         primaryKey:true,
@@ -10,14 +11,13 @@ const PubRepo = dbContext.define('PubRepo',{
     },
     code:{
         type:DataTypes.STRING(6),
-        unique:true,
-        allowNull:false
+        allowNull:false,
+        references:{
+            model:PubRepo,
+            key:'code'
+        }
     },
-    name:{
-        type:DataTypes.STRING(32),
-        allowNull:false
-    },
-    creator:{
+    commenter:{
         type:DataTypes.STRING(16),
         allowNull:false,
         references:{
@@ -25,31 +25,30 @@ const PubRepo = dbContext.define('PubRepo',{
             key:'name'
         }
     },
-    download_time:{
-        type:DataTypes.INTEGER,
-        defaultValue:0
+    comment:{
+        type:DataTypes.STRING(200),
+        allowNull:false
     },
     create_time:{
         type:DataTypes.DATE,
         allowNull:false
     }
-},
-{
-    tableName:'pub_repo',
+},{
+    tableName:'pub_comment',
     timestamps:true,
     createdAt:'create_time',
     updatedAt:false
 })
 
-defineMaxId(PubRepo);
+defineMaxId(PubComment);
 
-// PubRepo.belongsTo(Player,{
-//     sourceKey:'creator',
-//     foreignKey:'name'
-// });
-// Player.hasMany(PubRepo,{
-//     sourceKey:'creator',
-//     foreignKey:'name'
-// });
+PubRepo.hasMany(PubComment,{
+    sourceKey:'code',
+    foreignKey:'code'
+});
+PubComment.belongsTo(PubRepo,{
+    sourceKey:'code',
+    foreignKey:'code'
+});
 
-module.exports = PubRepo;
+module.exports = PubComment;

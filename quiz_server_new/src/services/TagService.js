@@ -10,6 +10,7 @@ async function findAll() {
     return tags;
   } catch (error) {
     console.log(`findAll err:${error}`);
+    throw error;
   }
 }
 
@@ -22,6 +23,7 @@ async function findById(id) {
     return tag;
   } catch (error) {
     console.log(`findTagById err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -38,6 +40,7 @@ async function findByName(name) {
     return tag;
   } catch (error) {
     console.log(`findTagById err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -54,6 +57,7 @@ async function insert(name) {
     return newTag;
   } catch (error) {
     console.error(`insert err:${error},name:${name}`);
+    throw error;
   }
 }
 
@@ -66,6 +70,7 @@ async function remove(name) {
     return await tag.destroy();
   } catch (error) {
     console.error(`remove err:${error},name:${name}`);
+    throw error;
   }
 }
 
@@ -80,6 +85,7 @@ async function updateName({ id, name }) {
     return effects;
   } catch (error) {
     console.error(`update err:${error},name:${name}`);
+    throw error;
   }
 }
 

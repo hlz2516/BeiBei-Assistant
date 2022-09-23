@@ -67,8 +67,8 @@ app.listen(port, () => {
 //调试测试代码时，把app.listen注释掉，把下面的代码开启
 // async function doSth(){
 //    try {
-//      let res = await pubRepoServ.findAll();
-//      console.log('res',res);
+//     let res = await pubRepoServ.getComments('d5f8e2');
+//     console.log('res',res);
 //    } catch (error) {
 //     console.log('dosth error:',error);
 //    }

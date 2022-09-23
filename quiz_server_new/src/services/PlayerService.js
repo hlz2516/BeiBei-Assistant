@@ -13,6 +13,8 @@ async function findAll() {
     }
   } catch (error) {
     console.log(`findAll err:${error}`);
+    //为了让router层能捕获到错误，并跳到错误路由返回给浏览器端
+    throw error;
   }
 }
 
@@ -26,6 +28,7 @@ async function findById(id) {
     }
   } catch (error) {
     console.log(`findById err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -43,6 +46,7 @@ async function findByName(name) {
     }
   } catch (error) {
     console.log(`findByName err:${error},name:${name}`);
+    throw error;
   }
 }
 
@@ -71,6 +75,7 @@ async function insert(name, password) {
     return player;
   } catch (error) {
     console.error(`insert err:${error},name:${name},password:${password}`);
+    throw error;
   }
 }
 
@@ -83,6 +88,7 @@ async function removeByName(name) {
     return await player.destroy();
   } catch (error) {
     console.error(`remove err:${error},name:${name}`);
+    throw error;
   }
 }
 
@@ -95,6 +101,7 @@ async function removeById(id) {
     return await player.destroy();
   } catch (error) {
     console.error(`remove err:${error},id:${id}`);
+    throw error;
   }
 }
 
@@ -109,6 +116,7 @@ async function updateName({ id, name }) {
     return effects;
   } catch (error) {
     console.error(`updateName err:${error},id:${id},name:${name}`);
+    throw error;
   }
 }
 
@@ -123,6 +131,7 @@ async function updatePassword({ id, password }) {
     return effects;
   } catch (error) {
     console.error(`updatePassword err:${error},id:${id},password:${password}`);
+    throw error;
   }
 }
 
@@ -141,6 +150,7 @@ async function checkPassword({ id }, password) {
     }
   } catch (error) {
     console.error(`checkPassword err:${error},id:${id},password:${password}`);
+    throw error;
   }
 }
 
@@ -162,6 +172,7 @@ async function getRepos(id) {
     return [];
   } catch (error) {
     console.error(`getRepos err:${error},id:${id}`);
+    throw error;
   }
 }
 

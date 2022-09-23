@@ -100,13 +100,12 @@ router.post("/quiz/setlevel", async (req, res, next) => {
   try {
     const quizId = req.body["quizId"];
     const level = req.body["level"];
-    const quiz = await quizServ.updateLevel({ id: quizId, level });
-    if (quiz) {
-      res.json({
-        msg: "OK",
-        status: 200,
-      });
-    }
+    await quizServ.updateLevel({ id: quizId, level });
+
+    res.json({
+      msg: "OK",
+      status: 200,
+    });
   } catch (error) {
     next(error);
   }
@@ -297,20 +296,19 @@ router.get("/quiz/rem", async (req, res, next) => {
   }
 });
 
-router.post('/quiz/del',async (req,res,next)=>{
+router.post("/quiz/del", async (req, res, next) => {
   try {
-    let quizId = req.body['quizId'];
+    let quizId = req.body["quizId"];
     //在tagquizs表中找到该quizId，删除
-    let result = await quizServ.removeById(quizId);
-    if (result===0) {
-      res.json({
-        msg:'OK',
-        status:200
-      })
-    }
+    await quizServ.removeById(quizId);
+
+    res.json({
+      msg: "OK",
+      status: 200,
+    });
   } catch (error) {
     next(error);
   }
-})
+});
 
 module.exports = router;
