@@ -23,3 +23,5 @@ app.use(store)
   }
 
   console.log(process.env);
+
+export default app;

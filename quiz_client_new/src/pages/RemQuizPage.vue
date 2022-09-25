@@ -6,43 +6,69 @@
       </template>
       <div class="options">
         <!-- 题库选择 -->
-        <div class="option-item">
+        <div class="option-item" style="flex: 0">
           <label for="repo-selector">选择题库</label>
-          <Select v-model="options.repo" id="repo-selector" @on-change="getCurRepo">
+          <Select
+            v-model="options.repo"
+            id="repo-selector"
+            @on-change="getCurRepo"
+          >
             <Option v-for="(repo, index) in repos" :value="repo" :key="index">{{
               repo
             }}</Option>
           </Select>
         </div>
-        <!-- 标签选择 -->
-        <div class="option-item">
-          <label for="tag-selector">选择标签</label>
-          <Select v-model="options.tag" id="rag-selector" @on-open-change="tagSelectorOpen" >
-            <Option v-for="(tag, index) in tags" :value="tag" :key="index">{{
-              tag
-            }}</Option>
-          </Select>
+        <!-- 选择模式 -->
+        <div class="option-item" style="flex: 0">
+          <label for="mode-selector">选择模式</label>
+          <RadioGroup
+            v-model="mode"
+            id="mode-selector"
+            @on-change="radioChanged"
+          >
+            <Radio label="随机模式"></Radio>
+            <Radio label="目标模式"></Radio>
+          </RadioGroup>
         </div>
-        <!-- 重要程度选择 -->
-        <div class="option-item">
-          <label for="imp-selector">选择重要程度</label>
-          <Select v-model="options.importance" id="imp-selector">
-            <Option
-              v-for="(imp, index) in importances"
-              :value="imp"
-              :key="index"
-              >{{ imp }}</Option
+        <div v-if="mode === '随机模式'">
+          <!-- 标签选择 -->
+          <div class="option-item">
+            <label for="tag-selector">选择标签</label>
+            <Select
+              v-model="options.tag"
+              id="rag-selector"
+              @on-open-change="tagSelectorOpen"
             >
-          </Select>
+              <Option v-for="(tag, index) in tags" :value="tag" :key="index">{{
+                tag
+              }}</Option>
+            </Select>
+          </div>
+          <!-- 重要程度选择 -->
+          <div class="option-item">
+            <label for="imp-selector">选择重要程度</label>
+            <Select v-model="options.importance" id="imp-selector">
+              <Option
+                v-for="(imp, index) in importances"
+                :value="imp"
+                :key="index"
+                >{{ imp }}</Option
+              >
+            </Select>
+          </div>
+          <!-- 题目数量 -->
+          <div class="option-item">
+            <label for="num-selector">选择题目数量</label>
+            <Select v-model="options.num" id="num-selector">
+              <Option v-for="(num, index) in nums" :value="num" :key="index">{{
+                num
+              }}</Option>
+            </Select>
+          </div>
         </div>
-        <!-- 题目数量 -->
-        <div class="option-item">
-          <label for="num-selector">选择题目数量</label>
-          <Select v-model="options.num" id="num-selector">
-            <Option v-for="(num, index) in nums" :value="num" :key="index">{{
-              num
-            }}</Option>
-          </Select>
+        <div class="target-mode-tips" v-show="mode == '目标模式'">
+          <p>请在右侧多选框中选择至少3道题目</p>
+          <p>背题开始后，加载的题目就是你选择的题目</p>
         </div>
       </div>
 
@@ -51,7 +77,31 @@
         <Button type="success" @click="loadingQuizs" long>开始背题</Button>
       </div>
     </card>
+    <card class="quiz-selector" v-show="mode === '目标模式'">
+      <template v-slot:title>
+        <search-bar height="30px" width="100%" input-bgc="#fff" />
+      </template>
+      <div class="quiz-list">
+        <Table
+          border
+          :columns="quizSelector.columns"
+          :data="pagedData"
+          :loading="quizSelector.loading"
+          @on-select="handleSelect"
+          @on-select-cancel="handleUnselect"
+          @on-selection-change="handleSelectQuiz"
+        ></Table>
+      </div>
+      <Divider size="small" style="margin: 0" />
+      <div class="quiz-list-page">
+        <Page
+          v-model="quizSelector.curPage"
+          :total="quizSelector.data.length"
+        />
+      </div>
+    </card>
   </div>
+
   <div v-else class="rem-page">
     <div class="rem-container">
       <div class="title">
@@ -111,6 +161,7 @@ export default {
   name: "RemQuizPage",
   data() {
     return {
+      mode: "随机模式",
       prepare: true,
       repos: [],
       tags: [],
@@ -124,59 +175,78 @@ export default {
       },
       //{id,question,answer,references,importance,level,tags}
       quizs: [
-        {
-          id: 1,
-          question: "question1",
-          answer: "answer1",
-          references: "www.baidu.com",
-          importance: "重要",
-          level: "未知",
-          tags: [{name:'html'}, {name:'css'}],
-        },
-        {
-          id: 2,
-          question: "question2",
-          answer: "answer2",
-          references: "www.bilibili.com",
-          importance: "重要",
-          level: "未知",
-          tags: [{name:'java'}, {name:'c#'}],
-        },
+        // {
+        //   id: 1,
+        //   question: "question1",
+        //   answer: "answer1",
+        //   references: "www.baidu.com",
+        //   importance: "重要",
+        //   level: "未知",
+        //   tags: [ "html","css" ],
+        // }
       ],
       show: false,
-      loadingCom:null
+      loadingCom: null,
+      quizSelector: {
+        columns: [
+          {
+            type: "selection",
+            width: 60,
+            align: "center",
+          },
+          {
+            title: "问题",
+            key: "question",
+          },
+        ],
+        data: [],
+        pageSize: 8,
+        loading: true,
+        curPage: 1,
+      },
     };
   },
   methods: {
     loadingQuizs() {
-        if (!this.options.repo || this.options.repo == '') {
-            this.$Modal.warning({title:'请选择题库！'});
-            return
-        }
+      this.loadingCom = this.$Message.loading({
+        content: "正在加载题目中......"
+      });
+
+      if (!this.options.repo || this.options.repo == "") {
+        this.$Modal.warning({ title: "请选择题库！" });
+        return;
+      }
+
+      if (this.mode === "随机模式") {
         if (this.tags.length === 0) {
-          this.$Modal.warning({title:'请选择标签！'});
-          return
+          this.$Modal.warning({ title: "请选择标签！" });
+          return;
         }
 
-        this.loadingCom = this.$Message.loading({
-            content:'正在加载题目中......',
-            duration:0
-        });
-        request.get('/quiz/rem',{
-            params:{
-                repo:this.options.repo,
-                number:this.options.num,
-                tag:this.options.tag,
-                importance:this.options.importance
-            }
-        })
-        .then(resp=>{
+        request
+          .get("/quiz/rem", {
+            params: {
+              repo: this.options.repo,
+              number: this.options.num,
+              tag: this.options.tag,
+              importance: this.options.importance,
+            },
+          })
+          .then((resp) => {
             if (resp.status === 200) {
-                this.loadingCom();
-                this.quizs = resp.data;
-                this.prepare = false;
+              this.loadingCom();
+              this.quizs = resp.data;
+              this.prepare = false;
             }
-        })
+          });
+      } else {
+        if (this.quizs.length < 3) {
+          this.$Modal.info({ title: "选择题目数量小于3，请重新选择！" });
+        } else {
+          this.loadingCom();
+          this.prepare = false;
+        }
+      }
     },
     changeShow() {
       this.show = !this.show;
@@ -205,55 +275,115 @@ export default {
           }
         });
     },
-    getCurRepo(value){
-      request.get('/tags_in_repo',{
-        params:{
-          repoName:value
-        }
-      })
-      .then(resp=>{
-        if (resp.status === 200) {
-          this.tags = resp.data;
-          if (this.tags.length === 0) {
-            throw new Error(`该题库[${value}]的标签数为0`);
+    getCurRepo(value) {
+      request
+        .get("/tags_in_repo", {
+          params: {
+            repoName: value,
+          },
+        })
+        .then((resp) => {
+          if (resp.status === 200) {
+            this.tags = resp.data;
+            if (this.tags.length === 0) {
+              throw new Error(`该题库[${value}]的标签数为0`);
+            }
+            this.tags.push("全部");
           }
-          this.tags.push('全部');
-        }
-      })
-      .catch(error=>{
-        this.$Modal.error({
-          title:'获取题库的标签出现错误，请联系开发者'
+        })
+        .catch((error) => {
+          this.$Modal.error({
+            title: "获取题库的标签出现错误，请联系开发者",
+          });
+          console.error(error);
         });
-        console.error(error)
-      })
     },
-    tagSelectorOpen(flag){
+    tagSelectorOpen(flag) {
       // console.log('flag',flag);
       if (flag) {
         if (this.options.repo == "") {
           this.$Modal.warning({
-            title:'请先选择题库！'
-          })
+            title: "请先选择题库！",
+          });
           return;
         }
       }
     },
-    giveup(){
-        this.quizs = [];
-        this.prepare = true;
-    }
+    giveup() {
+      this.quizs = [];
+      this.prepare = true;
+    },
+    radioChanged(value) {
+      if (value === "目标模式") {
+        if (!this.options.repo || this.options.repo == "") {
+          this.$Modal.info({ title: "请选择题库！" });
+          this.$nextTick(() => {
+            this.mode = "随机模式";
+          });
+          return;
+        }
+        request
+          .get("/quiz/quicksearch", {
+            params: {
+              key: `<${this.options.repo}>`,
+            },
+          })
+          .then((resp) => {
+            if (resp.status === 200) {
+              this.quizSelector.data = resp.data;
+              this.quizSelector.data.forEach((item) => {
+                item._checked = false;
+              });
+              this.quizSelector.loading = false;
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+    },
+    handleSelectQuiz(selection) {
+      // this.quizs = selection;
+    },
+    handleSelect(_, row) {
+      let len = this.quizSelector.data.length;
+      for (let i = 0; i < len; i++) {
+        if (row.id === this.quizSelector.data[i].id) {
+          this.quizSelector.data[i]._checked = true;
+          this.quizs.push(this.quizSelector.data[i]);
+          break;
+        }
+      }
+    },
+    handleUnselect(_, row) {
+      let len = this.quizSelector.data.length;
+      for (let i = 0; i < len; i++) {
+        if (row.id === this.quizSelector.data[i].id) {
+          this.quizSelector.data[i]._checked = false;
+          this.quizs = this.quizs.filter((q) => {
+            return q.id !== row.id;
+          });
+          break;
+        }
+      }
+    },
   },
 
   computed: {
     quiz() {
       return this.quizs[0];
     },
-    quizTags(){
-        let rawTags = this.quizs[0].tags;
-        return rawTags.map(tag=>{
-            return tag.name
-        }).join(',')
-    }
+    quizTags() {
+      return this.quizs[0].tags.join(",");
+    },
+    pagedData() {
+      let startIndex =
+        (this.quizSelector.curPage - 1) * this.quizSelector.pageSize;
+      return this.quizSelector.data.slice(
+        startIndex,
+        startIndex + this.quizSelector.pageSize
+      );
+    },
   },
 
   mounted() {
@@ -269,7 +399,7 @@ export default {
 <style lang="less" scoped>
 .options-page {
   width: 100%;
-  height: 60vh;
+  height: 80vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -301,6 +431,15 @@ export default {
           justify-content: center;
           align-items: center;
         }
+
+        .target-mode-tips {
+          flex: 1;
+          padding: 12px 4px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
       }
 
       .func-area {
@@ -311,12 +450,40 @@ export default {
       }
     }
   }
+
+  .quiz-selector {
+    margin-left: 20px;
+    width: 40%;
+    height: 90%;
+
+    /deep/ .ivu-card-body {
+      width: 100%;
+      height: calc(100% - 60px);
+      padding: 0 16px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .quiz-list {
+        flex: 1;
+        overflow: auto;
+      }
+
+      .quiz-list-page {
+        flex-basis: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
 }
 
 #repo-selector,
 #rag-selector,
 #imp-selector,
-#num-selector {
+#num-selector,
+#mode-selector {
   width: 200px;
   margin: 0 4px;
 }

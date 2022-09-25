@@ -31,7 +31,8 @@ export default {
     "flex-h": String,
     "half-radius": Boolean,
     placeholder: String,
-    "font-size": String
+    "font-size": String,
+    "input-bgc":String
   },
   mounted() {
     const container = this.$refs.search;
@@ -43,11 +44,18 @@ export default {
       container.style.setProperty("--con-height", this.height);
     }
 
+    
+
     const icon = this.$refs.icon;
     const input = this.$refs.input;
     if (this.fontSize) {
       icon.style.setProperty("font-size", this.fontSize);
       input.style.setProperty("font-size", this.fontSize);
+    }
+
+    if (this.inputBgc) {
+      console.log('get');
+      input.style.setProperty('background',this.inputBgc);
     }
 
     if (this.halfRadius) {

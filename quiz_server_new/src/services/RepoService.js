@@ -33,7 +33,6 @@ async function findById(id) {
 
 async function findByName(name,playerId) {
   try {
-    if(!playerId) playerId = null;
     const repo = await Repo.findOne({
       where: {
         name,
