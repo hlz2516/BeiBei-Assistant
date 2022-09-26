@@ -79,7 +79,12 @@
     </card>
     <card class="quiz-selector" v-show="mode === '目标模式'">
       <template v-slot:title>
-        <search-bar height="30px" width="100%" input-bgc="#fff" />
+        <search-bar
+          v-model="searchText"
+          height="30px"
+          width="100%"
+          input-bgc="#fff"
+        />
       </template>
       <div class="quiz-list">
         <Table
@@ -121,7 +126,7 @@
       </div>
       <Divider size="small" style="margin: 0" />
       <div class="content">
-        <div class="answer" v-if="show">
+        <div class="answer" v-show="show">
           <div
             class="ansdesc-part"
             v-html="quiz.answer"
@@ -133,7 +138,7 @@
             <span v-html="quiz.references"></span>
           </div>
         </div>
-        <div v-else class="tips" @click="changeShow">
+        <div v-show="!show" class="tips" @click="changeShow">
           <span>点击显示/隐藏答案</span>
         </div>
       </div>
@@ -162,6 +167,7 @@ export default {
   data() {
     return {
       mode: "随机模式",
+      searchText: "",
       prepare: true,
       repos: [],
       tags: [],
@@ -200,6 +206,7 @@ export default {
           },
         ],
         data: [],
+        searchData: [],
         pageSize: 8,
         loading: true,
         curPage: 1,
@@ -209,7 +216,7 @@ export default {
   methods: {
     loadingQuizs() {
       this.loadingCom = this.$Message.loading({
-        content: "正在加载题目中......"
+        content: "正在加载题目中......",
       });
 
       if (!this.options.repo || this.options.repo == "") {
@@ -252,8 +259,8 @@ export default {
       this.show = !this.show;
     },
     recircle() {
-      this.show = false;
       this.quizs.push(this.quizs.shift());
+      this.show = false;
     },
     setLevel(level) {
       request
@@ -261,11 +268,11 @@ export default {
           quizId: this.quiz.id,
           level,
         })
-        .then((result)=>{
+        .then((result) => {
           if (result.status === 200) {
-            return request.post('/quiz/remIncrease',{
-              quizId:this.quiz.id
-            })
+            return request.post("/quiz/remIncrease", {
+              quizId: this.quiz.id,
+            });
           }
         })
         .then((result) => {
@@ -278,10 +285,11 @@ export default {
               });
               this.quizs = [];
               this.prepare = true;
+              this.quizSelector.data = [];
             }
           }
         })
-        .catch(error=>{
+        .catch((error) => {
           console.error(error);
         });
     },
@@ -381,34 +389,54 @@ export default {
 
   computed: {
     quiz() {
-      // this.quizs[0].tags = this.quizs[0].tags.join(",");
-      let tagsArr = Array.from(this.quizs[0].tags) ;
-      this.quizs[0].tags = tagsArr.join(',');
+      if (this.quizs.length === 0) {
+        return {
+          id:0,
+          level:'未知',
+          importance:'未知',
+          tags:[],
+          question:'',
+          answer:'',
+          references:''
+        };
+      }
+      let tagsArr = Array.from(this.quizs[0].tags);
+      this.quizs[0].tags = tagsArr.join(",");
       //链接处理
       //原链接格式如：[标题](链接地址),[..](..)
-      let refs = this.quizs[0].references.split(',');
-      let htmlLinks = refs.map(ref=>{
-        let regex1 = /\[.+\]/;
-        let regex2 = /\(.+\)/;
-        
-        let title = ref.match(regex1)[0];
-        title = title.substring(1,title.length-1);
+      let refs = this.quizs[0].references.split(",");
+      let htmlLinks = refs
+          .map((ref) => {
+            if(ref == ''){
+              return '';
+            }
+            let regex1 = /\[.+\]/;
+            let regex2 = /\(.+\)/;
+            let title = ref.match(regex1)[0];
+            title = title.substring(1, title.length - 1);
 
-        let link = ref.match(regex2)[0];
-        link = link.substring(1,link.length-1);
+            let link = ref.match(regex2)[0];
+            link = link.substring(1, link.length - 1);
 
-        return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
-      }).join(';');
+            return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
+          })
+          .join(";");
+
       this.quizs[0].references = htmlLinks;
       return this.quizs[0];
     },
     pagedData() {
       let startIndex =
         (this.quizSelector.curPage - 1) * this.quizSelector.pageSize;
-      return this.quizSelector.data.slice(
-        startIndex,
-        startIndex + this.quizSelector.pageSize
-      );
+      if (this.searchText.length > 0) {
+        return this.quizSelector.data.filter((quiz) => {
+          return quiz.question.indexOf(this.searchText) > -1;
+        });
+      } else
+        return this.quizSelector.data.slice(
+          startIndex,
+          startIndex + this.quizSelector.pageSize
+        );
     },
   },
 

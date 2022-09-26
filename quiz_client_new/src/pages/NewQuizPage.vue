@@ -3,8 +3,7 @@
     <div class="left-layout">
       <div class="search-part">
         <search-bar
-          :value="searchText"
-          v-on:input="getSearchValue"
+          v-model="searchText"
           @keyup.enter="search"
           width="100%"
         />
@@ -12,9 +11,9 @@
       <div class="result-part ivu-bb ivu-bl ivu-br">
         <List item-layout="vertical" border split>
           <ListItem
-            v-for="(data, index) in curPageData"
+            v-for="(data) in curPageData"
             :key="data.id"
-            @click.capture="loadToForm(index)"
+            @click.capture="loadToForm(data)"
             style="cursor: pointer"
           >
             <ListItemMeta
@@ -189,24 +188,22 @@ export default {
     },
   },
   methods: {
-    loadToForm(index) {
-      this.quiz.id = this.result.data[index].id;
-      this.quiz.question = this.result.data[index].question;
-      this.quiz.answer = this.result.data[index].answer;
-      this.quiz.references = this.result.data[index].references;
-      this.quiz.curImp = this.result.data[index].importance;
-      this.quiz.curRepo = this.result.data[index].repoName;
-      //对tags做特殊处理
-      let tags = this.result.data[index].tags;
-      this.quiz.tags = tags;
+    loadToForm(data) {
+      this.quiz.id = data.id;
+      this.quiz.question = data.question;
+      this.quiz.answer = data.answer;
+      this.quiz.references = data.references;
+      this.quiz.curImp = data.importance;
+      this.quiz.curRepo = data.repoName;
+      this.quiz.tags = data.tags;
     },
     beautifyDesc(value){
       value = value.replace(/<\/*\w+>/gi,'');
       return value.substr(0,20);
     },
-    getSearchValue(value) {
-      this.searchText = value;
-    },
+    // getSearchValue(value) {
+    //   this.searchText = value;
+    // },
     search() {
       if (this.searchText.trim() == "") {
         return;
