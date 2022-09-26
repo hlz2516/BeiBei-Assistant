@@ -38,6 +38,10 @@ const Quiz = dbContext.define("quiz", {
     type: DataTypes.STRING(16),
     defaultValue: "unknown",
   },
+  remCount: {
+    type:DataTypes.INTEGER,
+    defaultValue:0
+  },
   last_time: {
     type: DataTypes.DATE,
     allowNull: false,

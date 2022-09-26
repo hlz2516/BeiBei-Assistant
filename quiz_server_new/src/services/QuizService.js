@@ -2,7 +2,7 @@ const Quiz = require("../daos/Quiz");
 const TagQuizs = require("../daos/TagQuizs");
 const { dbContext, findTagsName } = require("../common/dbContext");
 const tagServ = require("./TagService");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const Tag = require("../daos/Tag");
 const _ = require("loadsh");
 
@@ -144,7 +144,7 @@ async function insert(
 }
 
 async function update(
-  { id, question, answer, importance, level, references },
+  { id, question, answer, importance, level, references, remCount },
   repoId,
   tags,
   playerId
@@ -160,6 +160,10 @@ async function update(
       references = "";
     }
 
+    if (!remCount) {
+      remCount = 0;
+    }
+
     const res = await dbContext.transaction(async (t) => {
       //检查每个tag是否都已存在数据库中，若不存在，则插入
       for (let i = 0; i < tags.length; i++) {
@@ -173,7 +177,7 @@ async function update(
       }
 
       const effects = await Quiz.update(
-        { repoId, question, answer, importance, level, references },
+        { repoId, question, answer, importance, level, references, remCount },
         {
           where: { id },
           transaction: t,
@@ -189,7 +193,7 @@ async function update(
       tagsinDB = tagsinDB.map((tag) => {
         return tag.name;
       });
-      console.log('origin',tagsinDB);
+      // console.log('origin',tagsinDB);
       //求tags对tagsinDB的差集，即tags里有，tagsinDB里没有的元素
       //对这些标签在关联表中添加
       let diffsA = _.difference(tags, tagsinDB);
@@ -201,7 +205,7 @@ async function update(
             {
               quizId: id,
               tagId: thisTag.getDataValue("id"),
-              playerId
+              playerId,
             },
             { transaction: t }
           );
@@ -213,16 +217,16 @@ async function update(
       //求tagsinDB对tags的差集，即tagsinDB里有，tags没有的元素
       //对这些元素在关联表里进行删除
       let diffsB = _.difference(tagsinDB, tags);
-      console.log('B',diffsB);
+      console.log("B", diffsB);
       for (let i = 0; i < diffsB.length; i++) {
         let thisTag = await tagServ.findByName(diffsB[i]);
         if (thisTag) {
           const efts = await TagQuizs.destroy({
             where: {
               quizId: id,
-              tagId: thisTag.getDataValue("id")
+              tagId: thisTag.getDataValue("id"),
             },
-            transaction:t
+            transaction: t,
           });
           if (efts === 0) {
             throw new Error("delete tagquiz error");
@@ -241,20 +245,20 @@ async function update(
 async function removeById(id) {
   try {
     let quiz = await findById(id);
-    let res = dbContext.transaction(async (t)=>{
+    let res = dbContext.transaction(async (t) => {
       //先删除tagquizs关联表的相关内容
       await TagQuizs.destroy({
-        where:{
-          quizId:id
+        where: {
+          quizId: id,
         },
-        transaction:t
+        transaction: t,
       });
       //删除问题本身
       await quiz.destroy({
-        transaction:t
+        transaction: t,
       });
       return 0;
-    })
+    });
     return res;
   } catch (error) {
     console.error(`remove err:${error},id:${id}`);
@@ -277,17 +281,46 @@ async function getTags({ id }) {
   }
 }
 
-async function updateLevel({id,level}){
+async function updateLevel({ id, level }) {
   try {
-    let quiz = await Quiz.update({level},{
-      where:{id}
-    });
+    let quiz = await Quiz.update(
+      { level },
+      {
+        where: { id },
+      }
+    );
     if (!quiz) {
-      console.error('update quiz level error');
+      console.error("update quiz level error");
     }
     return quiz;
   } catch (error) {
     console.error(`updateLevel err:${error},id:${id},level:${level}`);
+    throw error;
+  }
+}
+
+async function remIncrease({ id }) {
+  try {
+    let remCount = await Quiz.findOne({
+      where: {
+        id,
+      },
+      attributes: ["remCount"],
+    });
+    let newRemCount = remCount.getDataValue("remCount") + 1;
+    // console.log('newRemCount',newRemCount,typeof newRemCount);
+    await Quiz.update(
+      {
+        remCount: newRemCount,
+      },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+  } catch (error) {
+    console.error(`remIncrease err:${error},id:${id}`);
     throw error;
   }
 }
@@ -301,5 +334,6 @@ module.exports = {
   update,
   insert,
   getTags,
-  updateLevel
+  updateLevel,
+  remIncrease,
 };

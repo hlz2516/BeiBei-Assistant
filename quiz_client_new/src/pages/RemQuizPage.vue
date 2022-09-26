@@ -111,7 +111,7 @@
           >
           <span class="info-item">理解程度:{{ quiz.level }}</span>
           <span class="info-item">重要程度:{{ quiz.importance }}</span>
-          <span class="info-item">标签:{{ quizTags }}</span>
+          <span class="info-item">标签:{{ quiz.tags }}</span>
           <span class="info-item">还剩{{ quizs.length }}道</span>
         </div>
         <Divider size="small" style="margin: 0" />
@@ -129,8 +129,8 @@
           ></div>
           <Divider size="small" style="margin: 0" />
           <div class="ref-part">
-            <p>参考链接：</p>
-            <p>{{ quiz.references }}</p>
+            参考链接：
+            <span v-html="quiz.references"></span>
           </div>
         </div>
         <div v-else class="tips" @click="changeShow">
@@ -261,6 +261,13 @@ export default {
           quizId: this.quiz.id,
           level,
         })
+        .then((result)=>{
+          if (result.status === 200) {
+            return request.post('/quiz/remIncrease',{
+              quizId:this.quiz.id
+            })
+          }
+        })
         .then((result) => {
           if (result.status === 200) {
             this.show = false;
@@ -273,6 +280,9 @@ export default {
               this.prepare = true;
             }
           }
+        })
+        .catch(error=>{
+          console.error(error);
         });
     },
     getCurRepo(value) {
@@ -371,10 +381,26 @@ export default {
 
   computed: {
     quiz() {
+      // this.quizs[0].tags = this.quizs[0].tags.join(",");
+      let tagsArr = Array.from(this.quizs[0].tags) ;
+      this.quizs[0].tags = tagsArr.join(',');
+      //链接处理
+      //原链接格式如：[标题](链接地址),[..](..)
+      let refs = this.quizs[0].references.split(',');
+      let htmlLinks = refs.map(ref=>{
+        let regex1 = /\[.+\]/;
+        let regex2 = /\(.+\)/;
+        
+        let title = ref.match(regex1)[0];
+        title = title.substring(1,title.length-1);
+
+        let link = ref.match(regex2)[0];
+        link = link.substring(1,link.length-1);
+
+        return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
+      }).join(';');
+      this.quizs[0].references = htmlLinks;
       return this.quizs[0];
-    },
-    quizTags() {
-      return this.quizs[0].tags.join(",");
     },
     pagedData() {
       let startIndex =
@@ -556,6 +582,7 @@ export default {
         .ansdesc-part {
           width: 100%;
           height: 90%;
+          overflow: auto;
         }
 
         .ansdesc-part:hover {
@@ -566,7 +593,6 @@ export default {
         .ref-part {
           width: 100%;
           height: 10%;
-          overflow: auto;
         }
       }
 

@@ -72,8 +72,8 @@ async function remCoreQuery(playerId,repoId,importance,level,limited,tag){
       
     // }
     if (!tag) {
-      sqlStr = `select * from quiz where repoId = ? and importance in (?) and level = ? and destroy_time is null limit ?`;
-      console.log('no tags');
+      sqlStr = `select * from quiz where repoId = ? and importance in (?) and level = ? and 
+      destroy_time is null order by remCount asc limit ?`;
       results =  await dbContext.query(sqlStr,
         {
           replacements:[repoId,importance,level,limited],
@@ -81,10 +81,10 @@ async function remCoreQuery(playerId,repoId,importance,level,limited,tag){
         })
     }
     else{
-      console.log('has tags');
       sqlStr = `select * from quiz where repoId = ? and importance in (?) and level = ? and 
       id in (select tq.quizId from tagquizs tq,tag t where tq.tagId = t.id and t.name = ?
-         and tq.playerId = ? and t.destroy_time is null) and destroy_time is null limit ?`;
+         and tq.playerId = ? and t.destroy_time is null) and destroy_time is null 
+         order by remCount asc limit ?`;
       results =  await dbContext.query(sqlStr,
         {
           replacements:[repoId,importance,level,tag,playerId,limited],

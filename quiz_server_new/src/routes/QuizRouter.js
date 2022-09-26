@@ -256,7 +256,6 @@ router.get("/quiz/rem", async (req, res, next) => {
     let planUnknowned = Math.ceil(total * ratio[0]);
     let planUnderstood = Math.ceil(total * ratio[1]);
     let planFamiliared = total - planUnknowned - planUnderstood;
-    // console.log(planUnknowned, planUnderstood, planFamiliared);
     //处理标签和重要程度
     let imps = [];
     if (imp === "全部") {
@@ -267,12 +266,8 @@ router.get("/quiz/rem", async (req, res, next) => {
       tagName = null;
     }
 
-    // console.log("tags", tags);
-    // console.log("imps", imps);
-    console.log('00000000');
     let repoModel = await repoServ.findByName(repoName, userId);
     const repoId = repoModel.getDataValue("id");
-    // console.log('repoId',repoId);
     //根据条件找熟悉的
     let familiarRes = await remCoreQuery(
       userId,
@@ -282,20 +277,13 @@ router.get("/quiz/rem", async (req, res, next) => {
       planFamiliared,
       tagName
     );
-    //查出来的是quiz表内部不带tags，所以我们要自己找
-    // for (let i = 0; i < familiarRes.length; i++) {
-    //   let famTags = await findTagsName(familiarRes[i].id);
-    //   familiarRes[i].tags = famTags;
-    // }
 
     familiarRes = await wrapQuizs(familiarRes);
     data.push(...familiarRes);
-    // console.log('familiarRes',familiarRes.length);
     //如果查到的记录条数不满足预期，那么在预期的未知记录上加上该差值
     if (familiarRes.length < planFamiliared) {
       planUnknowned += planFamiliared - familiarRes.length;
     }
-    console.log('11111');
     //根据条件找理解的
     let understoodRes = await remCoreQuery(
       userId,
@@ -305,13 +293,10 @@ router.get("/quiz/rem", async (req, res, next) => {
       planUnderstood,
       tagName
     );
-    // for (let i = 0; i < understoodRes.length; i++) {
-    //   let undTags = await findTagsName(understoodRes[i].id);
-    //   understoodRes[i].tags = undTags;
-    // }
+
     understoodRes = await wrapQuizs(understoodRes);
     data.push(...understoodRes);
-    // console.log('understoodRes',understoodRes.length);
+
     //对于已理解查到的记录数同理
     if (understoodRes.length < planUnderstood) {
       planUnknowned += planUnderstood - understoodRes.length;
@@ -325,13 +310,10 @@ router.get("/quiz/rem", async (req, res, next) => {
       planUnknowned,
       tagName
     );
-    // for (let i = 0; i < unknownRes.length; i++) {
-    //   let unkTags = await findTagsName(unknownRes[i].id);
-    //   unknownRes[i].tags = unkTags;
-    // }
+
     unknownRes = await wrapQuizs(unknownRes);
     data.push(...unknownRes);
-    // console.log('unknownRes',unknownRes.length);
+
     res.json({
       data,
       status: 200,
@@ -355,5 +337,17 @@ router.post("/quiz/del", async (req, res, next) => {
     next(error);
   }
 });
+
+router.post("/quiz/remIncrease",async (req,res,next)=>{
+  try {
+    const quizId = req.body['quizId'];
+    await quizServ.remIncrease({id:quizId});
+    res.json({
+      status:200
+    })
+  } catch (error) {
+    next(error);
+  }
+})
 
 module.exports = router;

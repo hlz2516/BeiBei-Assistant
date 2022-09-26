@@ -37,6 +37,8 @@ create table quiz(
     importance char(16) default '未知',
     -- 自己的记忆程度，可选字符串:'已熟悉' '已理解' '不理解' '未知',其中未知是在数据库中还没抽到(背过)的题
     `level` char(16) default '未知',
+    -- 表示用户背过几次这道题
+    remCount int default 0,
     -- 最后一次更新理解程度的时间，在出题时就必须登记
     last_time Timestamp null,
     destroy_time Timestamp null

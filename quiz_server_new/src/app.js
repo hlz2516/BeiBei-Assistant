@@ -9,6 +9,7 @@ const pubRepoRouter = require('./routes/PubRepoRouter');
 const { expressjwt: jwt } = require("express-jwt");
 const { secretKey } = require("./common/sec");
 const pubRepoServ = require('./services/PubRepoService');
+const quizServ = require('./services/QuizService');
 
 let port = 9000;
 if (process.env.NODE_ENV === 'production') {
@@ -67,7 +68,7 @@ app.listen(port, () => {
 //调试测试代码时，把app.listen注释掉，把下面的代码开启
 // async function doSth(){
 //    try {
-//     let res = await pubRepoServ.getComments('d5f8e2');
+//     let res = quizServ.remIncrease({id:2});
 //     console.log('res',res);
 //    } catch (error) {
 //     console.log('dosth error:',error);
