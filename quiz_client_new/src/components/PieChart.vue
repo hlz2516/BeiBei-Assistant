@@ -1,5 +1,5 @@
 <template>
-  <div ref="line" id="line"></div>
+  <div ref="pie" id="pie"></div>
 </template>
 
 <script>
@@ -7,7 +7,7 @@ import * as echarts from "echarts";
 import themeObj from "../styles/walden.project.json";
 
 export default {
-  name: "LineChart",
+  name: "PieChart",
   data() {
     return {
       chart: null,
@@ -16,7 +16,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "示例",
+      default: '',
     },
     datas: {
       type: Array,
@@ -26,34 +26,32 @@ export default {
       type: Array,
       defualt: [],
     },
+    radius: {
+      type: String,
+      default: "100%",
+    },
   },
   mounted() {
     echarts.registerTheme("walden", themeObj.theme);
-    this.chart = echarts.init(this.$refs.line, "walden");
+    this.chart = echarts.init(this.$refs.pie, "walden");
     this.chart.setOption({
       title: {
         text: this.title,
       },
-      xAxis: {
-        type: "category",
+      tooltip: {
+        trigger: "item",
+        formatter: "{b} : {c} ({d}%)",
+      },
+      legend: {
+        orient: "vertical",
+        left: "left",
         data: this.category,
       },
-      yAxis: {
-        type: "value",
+      series: {
+        type: "pie",
+        data: this.datas,
+        radius: this.radius,
       },
-      series: [
-        {
-          data: this.datas,
-          type: "line",
-          label: {
-            show: true,
-            position: "top",
-            textStyle: {
-              fontSize: 12,
-            },
-          },
-        },
-      ],
     });
   },
   unmounted() {
@@ -64,8 +62,8 @@ export default {
 </script>
 
 <style scoped>
-#line {
-  width: 100%;
-  height: 100%;
+#pie{
+    width: 100%;
+    height: 100%;
 }
 </style>

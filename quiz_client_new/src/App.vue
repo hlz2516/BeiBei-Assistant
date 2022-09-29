@@ -44,9 +44,9 @@
       </Header>
       <Content :style="{ padding: '0 50px', margin: '30px 0' }">
         <router-view v-slot="{ Component }" v-if="isRouterAlive">
-          <!-- <keep-alive> -->
+          <keep-alive exclude="RepoPage">
             <component :is="Component" />
-          <!-- </keep-alive> -->
+          </keep-alive>
         </router-view>
       </Content>
       <Footer class="layout-footer-center">

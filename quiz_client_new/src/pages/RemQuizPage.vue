@@ -149,10 +149,10 @@
         <Button type="primary" size="large" @click="setLevel('已理解')"
           >已理解</Button
         >
+        <Button type="info" size="large" @click="recircle">已模糊</Button>
         <Button type="warning" size="large" @click="setLevel('不理解')"
           >不理解</Button
         >
-        <Button type="info" size="large" @click="recircle">考虑一下</Button>
         <Button type="default" size="large" @click="giveup">不背了</Button>
       </div>
     </div>
