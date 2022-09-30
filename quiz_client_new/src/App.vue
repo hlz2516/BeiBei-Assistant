@@ -5,7 +5,7 @@
         <Menu
           mode="horizontal"
           theme="dark"
-          v-bind:active-name="activedName"
+          v-bind:active-name="$store.state.menuItem"
           @onSelect="handleSelect"
         >
           <div class="layout-user">
@@ -23,11 +23,11 @@
               <Icon type="ios-paper" />
               题库管理
             </MenuItem>
-            <MenuItem name="newQues" to="newQuiz">
+            <MenuItem name="newquiz" to="newquiz">
               <Icon type="md-bulb" />
               出 题
             </MenuItem>
-            <MenuItem name="remQues" to="remQuiz">
+            <MenuItem name="remquiz" to="remquiz">
               <Icon type="md-play" />
               背 题
             </MenuItem>
@@ -59,6 +59,7 @@
 <script>
 import {ref} from 'vue';
 import common from "./common";
+import app from './main';
 
 export default {
   name: "App",
@@ -69,25 +70,21 @@ export default {
   },
   setup() {
     //准备数据
-    let activedName = ref("login");
+    // let activedName = ref("login");
     let isRouterAlive = ref(true);
     //准备方法
     function handleSelect(name) {
       if (name === "login") {
         return;
       }
-
+      const store = app.config.globalProperties.$store;
       const token = localStorage.getItem("token");
       if (!token) {
         //目前只能通过这种重置再改变的方式让active的样式生效
-        setTimeout(() => {
-          activedName.value = '';
-        }, 0);
-        setTimeout(() => {
-          activedName.value = 'login';
-        }, 0);
+        // store.dispatch('setMenuItemDelay','');
+        store.dispatch('setMenuItemDelay','login');
       } else {
-        activedName.value = name;
+        store.dispatch('setMenuItemDelay',name);
       }
     }
 
@@ -99,7 +96,6 @@ export default {
     }
 
     return {
-      activedName,
       isRouterAlive,
       handleSelect,
       reload

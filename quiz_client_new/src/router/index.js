@@ -18,13 +18,13 @@ const routes = [
     component:RepoPage
   },
   {
-    path:'/newQuiz',
-    name:'newQuiz',
+    path:'/newquiz',
+    name:'newquiz',
     component:NewQuizPage
   },
   {
-    path:'/remQuiz',
-    name:'remQuiz',
+    path:'/remquiz',
+    name:'remquiz',
     component:RemQuizPage
   },
   {

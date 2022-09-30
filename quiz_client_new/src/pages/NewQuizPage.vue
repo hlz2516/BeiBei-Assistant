@@ -2,16 +2,12 @@
   <div class="container">
     <div class="left-layout">
       <div class="search-part">
-        <search-bar
-          v-model="searchText"
-          @keyup.enter="search"
-          width="100%"
-        />
+        <search-bar v-model="searchText" @keyup.enter="search" width="100%" />
       </div>
       <div class="result-part ivu-bb ivu-bl ivu-br">
         <List item-layout="vertical" border split>
           <ListItem
-            v-for="(data) in curPageData"
+            v-for="data in curPageData"
             :key="data.id"
             @click.capture="loadToForm(data)"
             style="cursor: pointer"
@@ -116,11 +112,19 @@
             >提交</Button
           >
           <Button type="info" @click="reset">重置</Button>
-          <Tooltip content="注意，该选项会删除数据库中对应的题目，请谨慎操作！" placement="top" max-width="100px">
+          <Tooltip
+            content="注意，该选项会删除数据库中对应的题目，请谨慎操作！"
+            placement="top"
+            max-width="100px"
+          >
             <Button type="error" @click="handleDelete">删除</Button>
           </Tooltip>
 
-          <Tooltip content="注意，该选项会重置该题目的熟练度为未知，请谨慎操作！" placement="top" max-width="100px">
+          <Tooltip
+            content="注意，该选项会重置该题目的熟练度为未知，请谨慎操作！"
+            placement="top"
+            max-width="100px"
+          >
             <Button type="warning" @click="handleResetLevel">重置熟练度</Button>
           </Tooltip>
         </div>
@@ -132,8 +136,12 @@
         <h2>规则说明</h2>
       </template>
       <h3>搜索的书写规则</h3>
-      <p>目前仅支持快速搜索，只需输入关键词即可，优先按照id，问题/答案，题库名，标签名进行查找</p>
-      <p>快速搜索支持对于题目熟练度的特殊搜索，你可以搜索已熟悉的，已理解的，或不理解的题目，其搜索规则如下：</p>
+      <p>
+        目前仅支持快速搜索，只需输入关键词即可，优先按照id，问题/答案，题库名，标签名进行查找
+      </p>
+      <p>
+        快速搜索支持对于题目熟练度的特殊搜索，你可以搜索已熟悉的，已理解的，或不理解的题目，其搜索规则如下：
+      </p>
       <p>[熟练度]</p>
       <p>熟练度的可选值：已熟悉，已理解，不理解</p>
       <h3>参考链接的书写规则</h3>
@@ -184,7 +192,7 @@ export default {
     curPageData() {
       let pageSize = this.result.pageSize;
       let startIndex = (this.curPage - 1) * pageSize;
-      return this.result.data.slice(startIndex, startIndex+ pageSize);
+      return this.result.data.slice(startIndex, startIndex + pageSize);
     },
   },
   methods: {
@@ -197,9 +205,9 @@ export default {
       this.quiz.curRepo = data.repoName;
       this.quiz.tags = data.tags;
     },
-    beautifyDesc(value){
-      value = value.replace(/<\/*\w+>/gi,'');
-      return value.substr(0,20);
+    beautifyDesc(value) {
+      value = value.replace(/<\/*\w+>/gi, "");
+      return value.substr(0, 20);
     },
     // getSearchValue(value) {
     //   this.searchText = value;
@@ -229,8 +237,7 @@ export default {
     addTag() {
       if (this.tagText == "") return;
       if (this.quiz.tags.length >= 5) return;
-      if (this.quiz.tags.indexOf(this.tagText) > -1)
-        return;
+      if (this.quiz.tags.indexOf(this.tagText) > -1) return;
 
       this.quiz.tags.push(this.tagText);
       this.tagText = "";
@@ -245,7 +252,7 @@ export default {
         return;
       }
       //统计大概字数
-      let content = this.quiz.answer.replace(/<\/?[a-z]+>/gi,'');
+      let content = this.quiz.answer.replace(/<\/?[a-z]+>/gi, "");
       if (content.length < 10) {
         this.$Modal.warning({ title: "回答字数过少，请重新组织语言" });
         return;
@@ -266,51 +273,50 @@ export default {
       if (this.quiz.id === 0) {
         //新建题目
         request
-        .post("/quiz/add", {
-          id: this.quiz.id,
-          question: this.quiz.question,
-          answer: this.quiz.answer,
-          references: this.quiz.references,
-          tags: this.quiz.tags,
-          importances: this.quiz.curImp,
-          repo: this.quiz.curRepo,
-        })
-        .then((result) => {
-          if (result.status === 200) {
-            this.quiz.id = result.quizId;
-            this.$Notice.success({ title: "已成功提交！" });
+          .post("/quiz/add", {
+            id: this.quiz.id,
+            question: this.quiz.question,
+            answer: this.quiz.answer,
+            references: this.quiz.references,
+            tags: this.quiz.tags,
+            importances: this.quiz.curImp,
+            repo: this.quiz.curRepo,
+          })
+          .then((result) => {
+            if (result.status === 200) {
+              this.quiz.id = result.quizId;
+              this.$Notice.success({ title: "已成功提交！" });
+              this.submitDisabled = false;
+            }
+          })
+          .catch((error) => {
+            this.$Notice.error({ title: "提交失败！" });
             this.submitDisabled = false;
-          }
-        })
-        .catch((error) => {
-          this.$Notice.error({ title: "提交失败！" });
-          this.submitDisabled = false;
-          console.error(error);
-        });
-      }
-      else{
+            console.error(error);
+          });
+      } else {
         //更新题目
-        request.post('/quiz/update',{
-          id: this.quiz.id,
-          question: this.quiz.question,
-          answer: this.quiz.answer,
-          references: this.quiz.references,
-          tags: this.quiz.tags,
-          importances: this.quiz.curImp,
-          repo: this.quiz.curRepo,
-        })
-        .then((result) => {
-          if (result.status === 200) {
-            this.$Notice.success({ title: "已成功更新！" });
+        request
+          .post("/quiz/update", {
+            id: this.quiz.id,
+            question: this.quiz.question,
+            answer: this.quiz.answer,
+            references: this.quiz.references,
+            tags: this.quiz.tags,
+            importances: this.quiz.curImp,
+            repo: this.quiz.curRepo,
+          })
+          .then((result) => {
+            if (result.status === 200) {
+              this.$Notice.success({ title: "已成功更新！" });
+              this.submitDisabled = false;
+            }
+          })
+          .catch((reason) => {
+            this.$Notice.error({ title: "更新失败！" });
             this.submitDisabled = false;
-          }
-        })
-        .catch((reason) => {
-          this.$Notice.error({ title: "更新失败！" });
-          this.submitDisabled = false;
-        });
+          });
       }
-      
     },
     reset() {
       this.quiz = {
@@ -324,52 +330,54 @@ export default {
       };
       this.tagText = "";
     },
-    handleDelete(){
+    handleDelete() {
       if (this.quiz.id === 0) {
         this.$Modal.warning({
-          title:'请指定数据库中已存在的题目后再进行删除！'
-        })
+          title: "请指定数据库中已存在的题目后再进行删除！",
+        });
         return;
       }
 
-      request.post('/quiz/del',{
-        quizId:this.quiz.id
-      })
-      .then(resp=>{
-        if(resp.status === 200){
-          this.$Notice.success({
-            title:'已在数据库中删除该题目'
-          });
-          this.reset();
-        }
-      })
+      request
+        .post("/quiz/del", {
+          quizId: this.quiz.id,
+        })
+        .then((resp) => {
+          if (resp.status === 200) {
+            this.$Notice.success({
+              title: "已在数据库中删除该题目",
+            });
+            this.reset();
+          }
+        });
     },
-    handleResetLevel(){
+    handleResetLevel() {
       if (this.quiz.id === 0) {
         this.$Modal.warning({
-          title:'请指定数据库中已存在的题目后再重置熟练度！'
-        })
+          title: "请指定数据库中已存在的题目后再重置熟练度！",
+        });
         return;
       }
 
-      request.post('/quiz/setlevel',{
-        quizId:this.quiz.id,
-        level:'未知'
-      })
-      .then(resp=>{
-        if(resp.status === 200){
-          this.$Notice.success({
-            title:'已重置该题目的熟练度为未知'
-          })
-        }
-      })  
-      .catch(error=>{
-        console.error(error);
-        this.$Notice.error({
-            title:'重置熟练度失败！'
-          })
-      })
-    }
+      request
+        .post("/quiz/setlevel", {
+          quizId: this.quiz.id,
+          level: "未知",
+        })
+        .then((resp) => {
+          if (resp.status === 200) {
+            this.$Notice.success({
+              title: "已重置该题目的熟练度为未知",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          this.$Notice.error({
+            title: "重置熟练度失败！",
+          });
+        });
+    },
   },
   mounted() {
     request.get("/tags").then((result) => {
@@ -383,6 +391,25 @@ export default {
         this.repos = result.repos;
       }
     });
+  },
+  beforeRouteEnter(to, from, next) {
+    console.log('to',to);
+    // console.log('from',from);
+    // next();
+    //如果是从/general过来并且带有params，那么把值赋给这里的data
+    if (from.name == "general" && Object.keys(to.params).length > 0) {
+      next((vc) => {
+        vc.quiz.id = to.params.id;
+        vc.quiz.question = to.params.question;
+        vc.quiz.answer = to.params.answer;
+        vc.quiz.references = to.params.references;
+        vc.quiz.tags = to.params.tags;
+        vc.quiz.curRepo = to.params.repoName;
+        vc.quiz.curImp = to.params.importance;
+      });
+    } else {
+      next();
+    }
   },
 };
 </script>
