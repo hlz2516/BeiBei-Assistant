@@ -50,7 +50,7 @@
         </router-view>
       </Content>
       <Footer class="layout-footer-center">
-        <p>Powered by Express & Vue3 | Designed by View Design</p> 
+        <p>Powered by Express & Vue3 | Designed by View UI</p> 
         </Footer>
     </Layout>
   </div>

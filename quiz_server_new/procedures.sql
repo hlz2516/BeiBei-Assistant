@@ -9,7 +9,7 @@ create procedure `interview_dev`.`gettags`(in quiz_id bigint,out tags json)
 		declare tag_name char(16) default '';
 		declare res_tag json;
 		declare done int default 0;
-		declare cur_tag cursor for select b.`name` from tagquizs a,tag b where a.quizId = quiz_id and a.tagId = b.`id`;
+		declare cur_tag cursor for select b.`name` from tagquizs a,tag b where a.quizId = quiz_id and a.tagId = b.`id` and a.destroy_time is null and b.destroy_time is null;
 		declare continue handler for not found set done = 1;
 
 		set res_tag = JSON_ARRAY();
@@ -52,7 +52,7 @@ CREATE
 		declare tags json default '[]';
 		declare player_id int;
 		declare player_name varchar(16);
-		declare cur_quiz cursor for select `id`,`question`,`answer`,`importance` from quiz where `repoId` = repo_id;
+		declare cur_quiz cursor for select `id`,`question`,`answer`,`importance` from quiz where `repoId` = repo_id and destroy_time is null;
 		declare continue handler for not found set done = 1;
 
 		select `name`,`playerId` into repo_name,player_id from repo where `id` = repo_id;
@@ -106,13 +106,13 @@ create procedure `interview_dev`.`deal_tags`(in tags json,in quiz_id bigint,in _
             -- json_index=>$[0]，$[1]...
             select JSON_UNQUOTE(JSON_EXTRACT(tags,json_index)) into cur_tag;
             -- 在tag表中找是否存在这个tag
-            select count(*) into if_exists from tag where `name` = cur_tag;
+            select count(*) into if_exists from tag where `name` = cur_tag and destroy_time is null;
             -- select cur_tag;
             if(if_exists = 0) then
                 insert into tag(`name`) values(cur_tag);
             end if;
 
-            select id into tag_id from tag where `name` = cur_tag;
+            select id into tag_id from tag where `name` = cur_tag and destroy_time is null;
             insert into tagquizs(`tagId`,`quizId`,`playerId`) values(tag_id,quiz_id,_player_id);
             
             set i = i + 1;
@@ -147,13 +147,13 @@ create procedure `interview_dev`.`download`(in player_id int,in _code char(6))
         
         select `name` into repo_name from pub_repo where `code` = _code;
 		-- 检查该用户的题库中是否存在同名的题库，若存在，则在要插入的题库后添加后缀*
-		select count(*) into ifdup from repo where playerId = player_id and `name` = repo_name limit 1;
+		select count(*) into ifdup from repo where playerId = player_id and `name` = repo_name and destroy_time is null limit 1;
 		select ifdup;
 		if ifdup > 0 then
 			select CONCAT(repo_name,'*') into repo_name;
 		end if;
         insert into repo(playerId,`name`,origin) values(player_id,repo_name,_code); 
-        select id into repo_id from repo where `playerId` = player_id and `name` = repo_name;
+        select id into repo_id from repo where `playerId` = player_id and `name` = repo_name and destroy_time is null;
 
         open cur_quiz;
         flag:loop
@@ -165,7 +165,7 @@ create procedure `interview_dev`.`download`(in player_id int,in _code char(6))
 				-- 插入quiz表
                 insert into quiz(`repoId`,`question`,`answer`,`importance`) values(repo_id,q,a,i);
                 -- 查找该quiz的id
-                select id into cur_id from quiz where `repoId` = repo_id and `question` = q;
+                select id into cur_id from quiz where `repoId` = repo_id and `question` = q and destroy_time is null;
                 -- 对tags处理,关联tag表
                 call deal_tags(my_tags,cur_id,player_id);
 			end if;
@@ -179,3 +179,40 @@ create procedure `interview_dev`.`download`(in player_id int,in _code char(6))
 DELIMITER ;
 
 -- call download(1,'x54tg5');
+
+drop procedure if exists recordRemembered;
+
+DELIMITER $$
+
+create procedure `interview_dev`.`recordRemembered`()
+	BEGIN
+        -- 取quiz表里的每道题
+        declare _quiz_id bigint;
+        declare _player_id int;
+        declare _rem_count int;
+        declare _rem_count_before int;
+        declare done int default 0;
+        declare cur_quiz cursor for select `id`,`remCount`,`remConutBefore` from quiz where `destroy_time` is null;
+        declare continue handler for not found set done = 1;
+
+        open cur_quiz;
+        flag:loop
+            fetch cur_quiz into _quiz_id,_rem_count,_rem_count_before;
+            if (done = 1) then
+                leave flag;
+            end if;
+            select _quiz_id;
+            -- 比较每道题的remcount和remcountbefore，如果before大于remcount，
+            if _rem_count > _rem_count_before then
+                -- 那么找出这条道题的用户和id，插入到record表中
+                -- 并更新quiz表中这条记录，将before与remcount进行同步
+                select `playerId` into _player_id from tagquizs where `quizId` = _quiz_id and `destroy_time` is null limit 1;
+                insert into remember_record(`playerId`,`quizId`,`record_time`) values(_player_id,_quiz_id,NOW());
+                update quiz set `remConutBefore` = _rem_count where `id` = _quiz_id;
+            end if;
+            end loop;
+        close cur_quiz;
+	END$$
+DELIMITER ;
+
+-- call recordRemembered();

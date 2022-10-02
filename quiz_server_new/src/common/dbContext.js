@@ -129,6 +129,19 @@ async function findTagsByRepo(repoId){
   }
 }
 
+async function recordRemembered() {
+  try {
+    await dbContext.query('call recordRemembered();',
+    {
+      type:QueryTypes.ROW
+    })
+    return 0;
+  } catch (error) {
+    console.error(error);
+    return -1;
+  }
+}
+
 module.exports = {
     dbContext,
     DataTypes,
@@ -137,5 +150,6 @@ module.exports = {
     findTagsName,
     remCoreQuery,
     findQuizByLevel,
-    findTagsByRepo
+    findTagsByRepo,
+    recordRemembered
 };

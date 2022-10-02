@@ -404,6 +404,9 @@ export default {
       this.quizs[0].tags = tagsArr.join(",");
       //链接处理
       //原链接格式如：[标题](链接地址),[..](..)
+      if (!this.quizs[0].references) {
+        this.quizs[0].references = ""
+      }
       let refs = this.quizs[0].references.split(",");
       let htmlLinks = refs
           .map((ref) => {

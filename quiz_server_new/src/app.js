@@ -6,10 +6,13 @@ const repoRouter = require("./routes/RepoRouter");
 const tagRouter = require('./routes/TagRouter');
 const quizRouter = require('./routes/QuizRouter');
 const pubRepoRouter = require('./routes/PubRepoRouter');
+const generalRouter = require('./routes/GeneralRouter');
 const { expressjwt: jwt } = require("express-jwt");
 const { secretKey } = require("./common/sec");
 const pubRepoServ = require('./services/PubRepoService');
 const quizServ = require('./services/QuizService');
+const remServ = require('./services/RemService');
+const {mySchedule,recordJob} = require('./schedules');
 
 let port = 9000;
 if (process.env.NODE_ENV === 'production') {
@@ -48,6 +51,7 @@ app.use(repoRouter);
 app.use(tagRouter);
 app.use(quizRouter);
 app.use(pubRepoRouter);
+app.use(generalRouter);
 
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
@@ -60,6 +64,8 @@ app.use(function (err, req, res, next) {
  
   res.send({status:500,msg:'unknown error,please contact developer'})
 });
+//启动定时任务
+mySchedule.start(recordJob);
 
 app.listen(port, () => {
   console.log(`[interview king] is listening on port ${port}`);
@@ -68,8 +74,7 @@ app.listen(port, () => {
 //调试测试代码时，把app.listen注释掉，把下面的代码开启
 // async function doSth(){
 //    try {
-//     let res = quizServ.remIncrease({id:2});
-//     console.log('res',res);
+//     await remServ.getRemedInaDay(1,'2022-10-01T09:08:30.000Z');
 //    } catch (error) {
 //     console.log('dosth error:',error);
 //    }

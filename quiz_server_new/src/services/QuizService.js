@@ -2,7 +2,7 @@ const Quiz = require("../daos/Quiz");
 const TagQuizs = require("../daos/TagQuizs");
 const { dbContext, findTagsName } = require("../common/dbContext");
 const tagServ = require("./TagService");
-const { Op, where } = require("sequelize");
+const { Op, fn, col, literal } = require("sequelize");
 const Tag = require("../daos/Tag");
 const _ = require("loadsh");
 
@@ -325,6 +325,46 @@ async function remIncrease({ id }) {
   }
 }
 
+async function findAllSortedByLevel(playerId) {
+  try {
+    let model = await Quiz.findAll({
+      attributes: ["level", [fn("COUNT", col("id")), "quizCount"]],
+      where: {
+        repoId: {
+          [Op.in]: literal(
+            `(select id from repo where playerId = ${playerId})`
+          ),
+        },
+      },
+      group: "level",
+    });
+    return model;
+  } catch (error) {
+    console.log(`findAllByLevel error:${error},playerId:${playerId}`);
+    throw error;
+  }
+}
+
+async function findInRepoSortedByLevel(playerId, repoName) {
+  try {
+    let model = await Quiz.findAll({
+      attributes: ["level", [fn("COUNT", col("id")), "quizCount"]],
+      where: {
+        repoId: {
+          [Op.in]: literal(
+            `(select id from repo where name = '${repoName}' and playerId = ${playerId})`
+          ),
+        },
+      },
+      group: "level",
+    });
+    return model;
+  } catch (error) {
+    console.log(`findAllByLevel error:${error},playerId:${playerId}`);
+    throw error;
+  }
+}
+
 module.exports = {
   findAll,
   findById,
@@ -336,4 +376,6 @@ module.exports = {
   getTags,
   updateLevel,
   remIncrease,
+  findAllSortedByLevel,
+  findInRepoSortedByLevel
 };

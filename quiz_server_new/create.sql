@@ -18,6 +18,7 @@ create table repo(
     id int primary key auto_increment,
     playerId int references player(id),
     `name` varchar(32) not null,
+    `desc` varchar(200) default '', 
     origin char(6) default '',
     destroy_time Timestamp null,
     unique index(playerId,`name`)
@@ -32,13 +33,17 @@ create table quiz(
     -- 通过tagquizs表与quiz表进行多对多关联，这里不再记录
     -- tags char(64) not null,
     -- 回答的参考链接
-    `references` varchar(256),
+    `references` varchar(512),
     -- 题目的重要程度，出题时决定 可选字符串:'重要' '理解' '了解' '未知'
     importance char(16) default '未知',
     -- 自己的记忆程度，可选字符串:'已熟悉' '已理解' '不理解' '未知',其中未知是在数据库中还没抽到(背过)的题
     `level` char(16) default '未知',
     -- 表示用户背过几次这道题
     remCount int default 0,
+    -- 表示用户之前背过几次这道题，
+    -- 将remCount与remCountBefore比较得到用户当天是否背过这道题
+    -- 每晚固定时间在统计完毕后自动将该字段与remCount同步
+    remConutBefore int default 0,
     -- 最后一次更新理解程度的时间，在出题时就必须登记
     last_time Timestamp null,
     destroy_time Timestamp null
@@ -85,6 +90,14 @@ create table pub_quiz(
     tags json
 );
 
+drop table if exists remember_record;
+create table remember_record(
+    id bigint primary key auto_increment,
+    playerId int not null references player(id),
+    quizId bigint not null references quiz(id),
+    record_time Timestamp not null
+);
+
 insert into player(`name`,`password`) values('tom','dc483e80a7a0bd9ef71d8cf973673924');
 
 insert into repo(`name`,playerId) values('前端',1);
@@ -106,3 +119,6 @@ insert into tagquizs(quizId,tagId,playerId) values(1,3,1);
 insert into tagquizs(quizId,tagId,playerId) values(2,4,1);
 insert into tagquizs(quizId,tagId,playerId) values(2,5,1);
 insert into tagquizs(quizId,tagId,playerId) values(2,6,1);
+insert into tagquizs(quizId,tagId,playerId) values(3,2,1);
+insert into tagquizs(quizId,tagId,playerId) values(3,4,1);
+insert into tagquizs(quizId,tagId,playerId) values(3,6,1);

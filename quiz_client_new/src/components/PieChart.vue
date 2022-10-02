@@ -16,7 +16,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: '',
+      default: "",
     },
     datas: {
       type: Array,
@@ -58,12 +58,23 @@ export default {
     echarts.dispose(this.chart);
     this.chart = null;
   },
+  watch: {
+    datas(newVal) {
+      this.chart.setOption({
+        series: {
+          type: "pie",
+          data: newVal,
+          radius: this.radius,
+        },
+      });
+    },
+  },
 };
 </script>
 
 <style scoped>
-#pie{
-    width: 100%;
-    height: 100%;
+#pie {
+  width: 100%;
+  height: 100%;
 }
 </style>

@@ -19,6 +19,7 @@
     "loadsh": "^0.0.4",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
+    "node-schedule": "^2.1.0",
     "sequelize": "^6.21.4"
   }
 }

@@ -60,6 +60,35 @@ export default {
     echarts.dispose(this.chart);
     this.chart = null;
   },
+  watch: {
+    category(newVal) {
+      console.log('category updated');
+      this.chart.setOption({
+        xAxis: {
+          type: "category",
+          data: newVal
+        },
+      });
+    },
+    datas(newVal) {
+      console.log('datas updated');
+      this.chart.setOption({
+        series: [
+          {
+            data: newVal,
+            type: "line",
+            label: {
+              show: true,
+              position: "top",
+              textStyle: {
+                fontSize: 12,
+              },
+            },
+          },
+        ],
+      });
+    },
+  },
 };
 </script>
 
