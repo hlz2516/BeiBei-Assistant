@@ -25,6 +25,17 @@
           <span v-else>{{ row.name }}</span>
         </template>
 
+        <template #desc="{ row, index }">
+          <Input
+            type="text"
+            v-model="priRepos.editRepoDesc"
+            v-if="priRepos.editIndex === index"
+          />
+          <Tooltip :content="row.desc" max-width="200" placement="right" v-else>
+            <span>{{ row.desc.substring(0,36) }}</span>
+          </Tooltip>
+        </template>
+
         <template #action="{ row, index }">
           <div v-if="priRepos.editIndex === index">
             <Button class="ivu-mr-8" @click="handleSave(index)">保存</Button>
@@ -128,6 +139,7 @@ export default {
       priRepos: {
         columns: [
           { title: "题库", slot: "repoName" },
+          { title: "描述", slot: "desc" },
           { title: "题目数量", key: "quizCount" },
           { title: "题库来源", key: "origin" },
           {
@@ -135,9 +147,10 @@ export default {
             slot: "action",
           },
         ],
-        datas: [{ name: "html", quizCount: 0, origin: "" }],
+        datas: [{ name: "html", desc:"",quizCount: 0, origin: "" }],
         editIndex: -1,
         editRepoName: "",
+        editRepoDesc:"",
         newRepoName: "",
         curRepoName: "",
         curIndex: -1,
@@ -233,7 +246,7 @@ export default {
       } else {
         return this.pubRepos.datas.slice(startIndex, startIndex + pageSize);
       }
-    },
+    }
   },
   methods: {
     // test(row, index) {
@@ -242,6 +255,7 @@ export default {
     // },
     handleEdit(row, index) {
       this.priRepos.editRepoName = row.name;
+      this.priRepos.editRepoDesc = row.desc;
       this.priRepos.editIndex = index;
     },
     handleUpload(row, index) {
@@ -255,10 +269,12 @@ export default {
         .post("/repo/edit", {
           oldName: this.priRepos.datas[index].name,
           newName: this.priRepos.editRepoName,
+          desc:this.priRepos.editRepoDesc
         })
         .then((result) => {
           if (result.status === 200) {
             this.priRepos.datas[index].name = this.priRepos.editRepoName;
+            this.priRepos.datas[index].desc = this.priRepos.editRepoDesc;
             this.priRepos.editIndex = -1;
           } else {
             this.$Modal.warning({
@@ -298,6 +314,8 @@ export default {
       const newData = {
         name: this.priRepos.newRepoName,
         quizCount: 0,
+        desc:"",
+        origin:""
       };
       this.priRepos.datas.push(newData);
       //发送请求

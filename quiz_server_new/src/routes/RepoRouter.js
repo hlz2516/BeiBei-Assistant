@@ -19,6 +19,7 @@ router.get("/repos", async (req, res, next) => {
         name: repo.dataValues["name"],
         quizCount,
         origin: repo.dataValues["origin"],
+        desc:repo.dataValues['desc']
       });
     }
 
@@ -66,8 +67,10 @@ router.post("/repo/edit", async (req, res, next) => {
     const id = checkUserValid(req);
     let oldName = req.body["oldName"];
     let newName = req.body["newName"];
+    let desc = req.body["desc"];
     let repo = await repoServ.findByName(oldName, id);
     repo.setDataValue("name", newName);
+    repo.setDataValue("desc",desc);
     const effects = await repoServ.updateName(repo.dataValues);
 
     res.json({

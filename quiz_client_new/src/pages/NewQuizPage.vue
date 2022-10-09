@@ -63,6 +63,7 @@
               :filter-method="filterMethod"
               placeholder="输入适合该问题的标签"
               style="width: 180px"
+              @on-focus="getTags"
             >
             </AutoComplete>
             <Icon
@@ -136,14 +137,22 @@
         <h2>规则说明</h2>
       </template>
       <h3>搜索的书写规则</h3>
-      <p>
+      <p style="text-indent:24px;">
         目前仅支持快速搜索，只需输入关键词即可，优先按照id，问题/答案，题库名，标签名进行查找
       </p>
-      <p>
-        快速搜索支持对于题目熟练度的特殊搜索，你可以搜索已熟悉的，已理解的，或不理解的题目，其搜索规则如下：
-      </p>
-      <p>[熟练度]</p>
-      <p>熟练度的可选值：已熟悉，已理解，不理解</p>
+      <div>
+        <p>同时我也对快速搜索做了些扩展，让它支持一些特殊搜索：</p>
+        <ol style="padding-left:12px;">
+          <li>
+            可搜索已熟悉的，已理解的，不理解的或未知的题目，形式如：[熟练度]。
+            熟练度的可选值：已熟悉，已理解，不理解，未知
+          </li>
+          <li>
+            可搜索个人题库下某个题库的所有题目，形式如：&lt;题库名&gt;
+          </li>
+        </ol>
+        
+      </div>
       <h3>参考链接的书写规则</h3>
       <p>格式：[标题1](链接地址1),[标题2](链接地址2)...</p>
       <p>例如：[typeof与instanceof的区别](https:www.xxx.com/article?xxx=yyy)</p>
@@ -193,7 +202,7 @@ export default {
       let pageSize = this.result.pageSize;
       let startIndex = (this.curPage - 1) * pageSize;
       return this.result.data.slice(startIndex, startIndex + pageSize);
-    },
+    }
   },
   methods: {
     loadToForm(data) {
@@ -206,12 +215,10 @@ export default {
       this.quiz.tags = data.tags;
     },
     beautifyDesc(value) {
-      value = value.replace(/<\/*\w+>/gi, "");
+      //替换掉尖括号为空
+      value = value.replace(/<(.+?)>/gi, "");
       return value.substr(0, 20);
     },
-    // getSearchValue(value) {
-    //   this.searchText = value;
-    // },
     search() {
       if (this.searchText.trim() == "") {
         return;
@@ -378,14 +385,15 @@ export default {
           });
         });
     },
+    getTags() {
+      request.get("/tags").then((result) => {
+        if (result.status === 200) {
+          this.allTags = result.tags;
+        }
+      });
+    },
   },
   mounted() {
-    request.get("/tags").then((result) => {
-      if (result.status === 200) {
-        this.allTags = result.tags;
-      }
-    });
-
     request.get("/repos/name").then((result) => {
       if (result.status === 200) {
         this.repos = result.repos;
@@ -393,7 +401,7 @@ export default {
     });
   },
   beforeRouteEnter(to, from, next) {
-    console.log('to',to);
+    console.log("to", to);
     // console.log('from',from);
     // next();
     //如果是从/general过来并且带有params，那么把值赋给这里的data
@@ -509,7 +517,7 @@ export default {
         .tags-input {
           flex: 2.5;
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
           .add-sign {
             font-size: 24px;

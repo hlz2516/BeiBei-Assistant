@@ -5,6 +5,19 @@
         <h1>配置背题选项</h1>
       </template>
       <div class="options">
+        <!-- 选择模式 -->
+        <div class="option-item" style="flex: 0">
+          <label for="mode-selector">选择模式</label>
+          <RadioGroup
+            v-model="mode"
+            id="mode-selector"
+            @on-change="radioChanged"
+          >
+            <Radio label="随机模式"></Radio>
+            <Radio label="目标模式"></Radio>
+          </RadioGroup>
+        </div>
+
         <!-- 题库选择 -->
         <div class="option-item" style="flex: 0">
           <label for="repo-selector">选择题库</label>
@@ -18,18 +31,7 @@
             }}</Option>
           </Select>
         </div>
-        <!-- 选择模式 -->
-        <div class="option-item" style="flex: 0">
-          <label for="mode-selector">选择模式</label>
-          <RadioGroup
-            v-model="mode"
-            id="mode-selector"
-            @on-change="radioChanged"
-          >
-            <Radio label="随机模式"></Radio>
-            <Radio label="目标模式"></Radio>
-          </RadioGroup>
-        </div>
+        
         <div v-if="mode === '随机模式'">
           <!-- 标签选择 -->
           <div class="option-item">
@@ -86,8 +88,8 @@
           input-bgc="#fff"
         />
       </template>
-      <div class="quiz-list">
-        <Table
+      <div class="quiz-list" ref="listContainer">
+          <Table 
           border
           :columns="quizSelector.columns"
           :data="pagedData"
@@ -95,7 +97,9 @@
           @on-select="handleSelect"
           @on-select-cancel="handleUnselect"
           @on-selection-change="handleSelectQuiz"
-        ></Table>
+          :height="listHeight"
+          >
+      </Table>
       </div>
       <Divider size="small" style="margin: 0" />
       <div class="quiz-list-page">
@@ -112,16 +116,18 @@
       <div class="title">
         <div class="title-info">
           <span class="info-item" style="margin-left: 12px"
-            >#{{ quiz.id }}</span
+            >#{{ quiz.id || 0 }}</span
           >
-          <span class="info-item">理解程度:{{ quiz.level }}</span>
-          <span class="info-item">重要程度:{{ quiz.importance }}</span>
-          <span class="info-item">标签:{{ quiz.tags }}</span>
-          <span class="info-item">还剩{{ quizs.length }}道</span>
+          <span class="info-item">理解程度:{{ quiz.level || "unknown" }}</span>
+          <span class="info-item"
+            >重要程度:{{ quiz.importance || "unknown" }}</span
+          >
+          <span class="info-item">标签:{{ quiz.tags || "" }}</span>
+          <span class="info-item">还剩{{ quizs.length || 0 }}道</span>
         </div>
         <Divider size="small" style="margin: 0" />
         <div class="question">
-          <p>{{ quiz.question }}</p>
+          <p>{{ quiz.question || "" }}</p>
         </div>
       </div>
       <Divider size="small" style="margin: 0" />
@@ -129,13 +135,13 @@
         <div class="answer" v-show="show">
           <div
             class="ansdesc-part"
-            v-html="quiz.answer"
+            v-html="quiz.answer || ''"
             @click="changeShow"
           ></div>
           <Divider size="small" style="margin: 0" />
           <div class="ref-part">
             参考链接：
-            <span v-html="quiz.references"></span>
+            <span v-html="quiz.references || ''"></span>
           </div>
         </div>
         <div v-show="!show" class="tips" @click="changeShow">
@@ -179,7 +185,6 @@ export default {
         importance: "全部",
         num: 20,
       },
-      //{id,question,answer,references,importance,level,tags}
       quizs: [
         // {
         //   id: 1,
@@ -191,6 +196,7 @@ export default {
         //   tags: [ "html","css" ],
         // }
       ],
+      quizIndex: 0,
       show: false,
       loadingCom: null,
       quizSelector: {
@@ -207,9 +213,10 @@ export default {
         ],
         data: [],
         searchData: [],
-        pageSize: 8,
+        pageSize: 10,
         loading: true,
         curPage: 1,
+        listHeight:200
       },
     };
   },
@@ -259,7 +266,7 @@ export default {
       this.show = !this.show;
     },
     recircle() {
-      this.quizs.push(this.quizs.shift());
+      this.quizIndex = (this.quizIndex + 1) % this.quizs.length;
       this.show = false;
     },
     setLevel(level) {
@@ -278,7 +285,9 @@ export default {
         .then((result) => {
           if (result.status === 200) {
             this.show = false;
-            this.quizs.shift();
+            // this.quizs.shift();
+            //把当前index指向的元素删除,当前index不变
+            this.quizs.splice(this.quizIndex, 1);
             if (this.quizs.length === 0) {
               this.$Modal.info({
                 content: "恭喜您，已全部背完！今天你又变强了呢！",
@@ -294,8 +303,8 @@ export default {
         });
     },
     getCurRepo(value) {
-      request
-        .get("/tags_in_repo", {
+      if (this.mode === '随机模式') {
+      request.get("/tags_in_repo", {
           params: {
             repoName: value,
           },
@@ -315,6 +324,28 @@ export default {
           });
           console.error(error);
         });
+      }else if(this.mode === '目标模式'){
+        request.get("/quiz/quicksearch", {
+            params: {
+              key: `<${value}>`,
+            },
+          })
+          .then((resp) => {
+            if (resp.status === 200) {
+              this.quizSelector.data = resp.data;
+              this.quizSelector.data.forEach((item) => {
+                item._checked = false;
+              });
+              this.quizSelector.loading = false;
+              //计算下表格容器高度
+              let style = window.getComputedStyle(this.$refs.listContainer);
+              this.listHeight = parseInt(style.height,10);
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
     },
     tagSelectorOpen(flag) {
       // console.log('flag',flag);
@@ -333,31 +364,27 @@ export default {
     },
     radioChanged(value) {
       if (value === "目标模式") {
-        if (!this.options.repo || this.options.repo == "") {
-          this.$Modal.info({ title: "请选择题库！" });
-          this.$nextTick(() => {
-            this.mode = "随机模式";
-          });
-          return;
-        }
-        request
-          .get("/quiz/quicksearch", {
-            params: {
-              key: `<${this.options.repo}>`,
-            },
-          })
-          .then((resp) => {
-            if (resp.status === 200) {
-              this.quizSelector.data = resp.data;
-              this.quizSelector.data.forEach((item) => {
-                item._checked = false;
-              });
-              this.quizSelector.loading = false;
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-          });
+        this.mode = '目标模式';
+        // request.get("/quiz/quicksearch", {
+        //     params: {
+        //       key: `<${this.options.repo}>`,
+        //     },
+        //   })
+        //   .then((resp) => {
+        //     if (resp.status === 200) {
+        //       this.quizSelector.data = resp.data;
+        //       this.quizSelector.data.forEach((item) => {
+        //         item._checked = false;
+        //       });
+        //       this.quizSelector.loading = false;
+        //       //计算下表格容器高度
+        //       let style = window.getComputedStyle(this.$refs.listContainer);
+        //       this.listHeight = parseInt(style.height,10);
+        //     }
+        //   })
+        //   .catch((error) => {
+        //     console.error(error);
+        //   });
       }
     },
     handleSelectQuiz(selection) {
@@ -390,28 +417,29 @@ export default {
   computed: {
     quiz() {
       if (this.quizs.length === 0) {
-        return {
-          id:0,
-          level:'未知',
-          importance:'未知',
-          tags:[],
-          question:'',
-          answer:'',
-          references:''
-        };
+        return null;
       }
-      let tagsArr = Array.from(this.quizs[0].tags);
-      this.quizs[0].tags = tagsArr.join(",");
+
+      let index = this.quizIndex;
+      if(index == this.quizs.length){
+        index--;
+      }
+
+      if (this.quizs[index].tags instanceof Array) {
+        this.quizs[index].tags = this.quizs[index].tags.join(",");
+      }
+
       //链接处理
       //原链接格式如：[标题](链接地址),[..](..)
-      if (!this.quizs[0].references) {
-        this.quizs[0].references = ""
+      if (!this.quizs[index].references) {
+        this.quizs[index].references = "";
       }
-      let refs = this.quizs[0].references.split(",");
-      let htmlLinks = refs
+      if (this.quizs[index].references.indexOf(",") > -1) {
+        let refs = this.quizs[index].references.split(",");
+        let htmlLinks = refs
           .map((ref) => {
-            if(ref == ''){
-              return '';
+            if (ref == "") {
+              return "";
             }
             let regex1 = /\[.+\]/;
             let regex2 = /\(.+\)/;
@@ -424,9 +452,9 @@ export default {
             return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
           })
           .join(";");
-
-      this.quizs[0].references = htmlLinks;
-      return this.quizs[0];
+        this.quizs[index].references = htmlLinks;
+      }
+      return this.quizs[index];
     },
     pagedData() {
       let startIndex =
@@ -523,7 +551,6 @@ export default {
 
       .quiz-list {
         flex: 1;
-        overflow: auto;
       }
 
       .quiz-list-page {

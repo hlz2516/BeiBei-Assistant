@@ -25,6 +25,10 @@ const Repo = dbContext.define("repo", {
   origin:{
     type:DataTypes.STRING(6),
     allowNull:true
+  },
+  desc:{
+    type:DataTypes.STRING,
+    defaultValue:''
   }
 },
 {

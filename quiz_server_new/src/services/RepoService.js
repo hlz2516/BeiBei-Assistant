@@ -126,10 +126,10 @@ async function removeByName(name) {
   }
 }
 
-async function updateName({ id, name }) {
+async function updateName({ id, name,desc }) {
   try {
     const effects = await Repo.update(
-      { name },
+      { name,desc },
       {
         where: { id },
       }
