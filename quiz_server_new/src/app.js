@@ -9,9 +9,6 @@ const pubRepoRouter = require('./routes/PubRepoRouter');
 const generalRouter = require('./routes/GeneralRouter');
 const { expressjwt: jwt } = require("express-jwt");
 const { secretKey } = require("./common/sec");
-const pubRepoServ = require('./services/PubRepoService');
-const quizServ = require('./services/QuizService');
-const remServ = require('./services/RemService');
 const {mySchedule,recordJob} = require('./schedules');
 
 let port = 9000;

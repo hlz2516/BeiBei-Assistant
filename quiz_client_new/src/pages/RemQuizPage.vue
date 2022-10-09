@@ -31,7 +31,7 @@
             }}</Option>
           </Select>
         </div>
-        
+
         <div v-if="mode === '随机模式'">
           <!-- 标签选择 -->
           <div class="option-item">
@@ -89,7 +89,7 @@
         />
       </template>
       <div class="quiz-list" ref="listContainer">
-          <Table 
+        <Table
           border
           :columns="quizSelector.columns"
           :data="pagedData"
@@ -98,8 +98,8 @@
           @on-select-cancel="handleUnselect"
           @on-selection-change="handleSelectQuiz"
           :height="listHeight"
-          >
-      </Table>
+        >
+        </Table>
       </div>
       <Divider size="small" style="margin: 0" />
       <div class="quiz-list-page">
@@ -216,7 +216,7 @@ export default {
         pageSize: 10,
         loading: true,
         curPage: 1,
-        listHeight:200
+        listHeight: 200,
       },
     };
   },
@@ -303,29 +303,31 @@ export default {
         });
     },
     getCurRepo(value) {
-      if (this.mode === '随机模式') {
-      request.get("/tags_in_repo", {
-          params: {
-            repoName: value,
-          },
-        })
-        .then((resp) => {
-          if (resp.status === 200) {
-            this.tags = resp.data;
-            if (this.tags.length === 0) {
-              throw new Error(`该题库[${value}]的标签数为0`);
+      if (this.mode === "随机模式") {
+        request
+          .get("/tags_in_repo", {
+            params: {
+              repoName: value,
+            },
+          })
+          .then((resp) => {
+            if (resp.status === 200) {
+              this.tags = resp.data;
+              if (this.tags.length === 0) {
+                throw new Error(`该题库[${value}]的标签数为0`);
+              }
+              this.tags.push("全部");
             }
-            this.tags.push("全部");
-          }
-        })
-        .catch((error) => {
-          this.$Modal.error({
-            title: "获取题库的标签出现错误，请联系开发者",
+          })
+          .catch((error) => {
+            this.$Modal.error({
+              title: "获取题库的标签出现错误，请联系开发者",
+            });
+            console.error(error);
           });
-          console.error(error);
-        });
-      }else if(this.mode === '目标模式'){
-        request.get("/quiz/quicksearch", {
+      } else if (this.mode === "目标模式") {
+        request
+          .get("/quiz/quicksearch", {
             params: {
               key: `<${value}>`,
             },
@@ -339,7 +341,7 @@ export default {
               this.quizSelector.loading = false;
               //计算下表格容器高度
               let style = window.getComputedStyle(this.$refs.listContainer);
-              this.listHeight = parseInt(style.height,10);
+              this.listHeight = parseInt(style.height, 10);
             }
           })
           .catch((error) => {
@@ -348,7 +350,6 @@ export default {
       }
     },
     tagSelectorOpen(flag) {
-      // console.log('flag',flag);
       if (flag) {
         if (this.options.repo == "") {
           this.$Modal.warning({
@@ -364,27 +365,7 @@ export default {
     },
     radioChanged(value) {
       if (value === "目标模式") {
-        this.mode = '目标模式';
-        // request.get("/quiz/quicksearch", {
-        //     params: {
-        //       key: `<${this.options.repo}>`,
-        //     },
-        //   })
-        //   .then((resp) => {
-        //     if (resp.status === 200) {
-        //       this.quizSelector.data = resp.data;
-        //       this.quizSelector.data.forEach((item) => {
-        //         item._checked = false;
-        //       });
-        //       this.quizSelector.loading = false;
-        //       //计算下表格容器高度
-        //       let style = window.getComputedStyle(this.$refs.listContainer);
-        //       this.listHeight = parseInt(style.height,10);
-        //     }
-        //   })
-        //   .catch((error) => {
-        //     console.error(error);
-        //   });
+        this.mode = "目标模式";
       }
     },
     handleSelectQuiz(selection) {
@@ -402,7 +383,7 @@ export default {
     },
     handleUnselect(_, row) {
       let len = this.quizSelector.data.length;
-      for (let i = 0; i < len; i++) {
+      for (let i = 0; i <len; i++) {
         if (row.id === this.quizSelector.data[i].id) {
           this.quizSelector.data[i]._checked = false;
           this.quizs = this.quizs.filter((q) => {
@@ -421,7 +402,7 @@ export default {
       }
 
       let index = this.quizIndex;
-      if(index == this.quizs.length){
+      if (index == this.quizs.length) {
         index--;
       }
 
@@ -434,26 +415,30 @@ export default {
       if (!this.quizs[index].references) {
         this.quizs[index].references = "";
       }
-      if (this.quizs[index].references.indexOf(",") > -1) {
-        let refs = this.quizs[index].references.split(",");
-        let htmlLinks = refs
-          .map((ref) => {
-            if (ref == "") {
-              return "";
-            }
-            let regex1 = /\[.+\]/;
-            let regex2 = /\(.+\)/;
-            let title = ref.match(regex1)[0];
-            title = title.substring(1, title.length - 1);
-
-            let link = ref.match(regex2)[0];
-            link = link.substring(1, link.length - 1);
-
-            return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
-          })
-          .join(";");
-        this.quizs[index].references = htmlLinks;
+      //如果链接里包含</len;>说明已经被转换过，故跳过
+      if (this.quizs[index].references.indexOf('</a>') > -1) {
+        return this.quizs[index];
       }
+      let refs = this.quizs[index].references.split(",");
+      let htmlLinks = refs
+        .map((ref) => {
+          console.log('ref',ref);
+          if (ref == "") {
+            return "";
+          }
+          let regex1 = /\[(.+?)\]/;
+          let regex2 = /\((.+?)\)/;
+          let title = ref.match(regex1)[0];
+          title = title.substring(1, title.length - 1);
+
+          let link = ref.match(regex2)[0];
+          link = link.substring(1, link.length - 1);
+
+          return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
+        })
+        .join(";");
+      this.quizs[index].references = htmlLinks;
+
       return this.quizs[index];
     },
     pagedData() {
