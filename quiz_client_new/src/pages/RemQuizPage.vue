@@ -149,14 +149,14 @@
         </div>
       </div>
       <div class="footer">
-        <Button type="success" size="large" @click="setLevel('已熟悉')"
+        <Button type="success" size="large" @click="setLevel('已熟悉',$event)" :loading="famLoading"
           >已熟悉</Button
         >
-        <Button type="primary" size="large" @click="setLevel('已理解')"
+        <Button type="primary" size="large" @click="setLevel('已理解',$event)" :loading="undLoading"
           >已理解</Button
         >
         <Button type="info" size="large" @click="recircle">已模糊</Button>
-        <Button type="warning" size="large" @click="setLevel('不理解')"
+        <Button type="warning" size="large" @click="setLevel('不理解',$event)" :loading="noundLoading"
           >不理解</Button
         >
         <Button type="default" size="large" @click="giveup">不背了</Button>
@@ -218,6 +218,9 @@ export default {
         curPage: 1,
         listHeight: 200,
       },
+      famLoading:false,
+      undLoading:false,
+      noundLoading:false
     };
   },
   methods: {
@@ -269,7 +272,14 @@ export default {
       this.quizIndex = (this.quizIndex + 1) % this.quizs.length;
       this.show = false;
     },
-    setLevel(level) {
+    setLevel(level,e) {
+      let map = new Map();
+      map.set('已熟悉','famLoading');
+      map.set('已理解','undLoading');
+      map.set('不理解','noundLoading');
+      // console.log('loading value',map.get(e.target.innerText)); 
+      let loading = map.get(e.target.innerText)
+      this[loading] = true;
       request
         .post("/quiz/setlevel", {
           quizId: this.quiz.id,
@@ -288,6 +298,7 @@ export default {
             // this.quizs.shift();
             //把当前index指向的元素删除,当前index不变
             this.quizs.splice(this.quizIndex, 1);
+            this[loading] = false;
             if (this.quizs.length === 0) {
               this.$Modal.info({
                 content: "恭喜您，已全部背完！今天你又变强了呢！",
@@ -362,6 +373,7 @@ export default {
     giveup() {
       this.quizs = [];
       this.prepare = true;
+      this.quizSelector.data = [];
     },
     radioChanged(value) {
       if (value === "目标模式") {
@@ -422,7 +434,6 @@ export default {
       let refs = this.quizs[index].references.split(",");
       let htmlLinks = refs
         .map((ref) => {
-          console.log('ref',ref);
           if (ref == "") {
             return "";
           }

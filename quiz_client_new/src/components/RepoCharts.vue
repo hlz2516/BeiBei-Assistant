@@ -28,24 +28,7 @@ export default {
   data() {
     return {
       category: ["已熟悉", "已理解", "不理解", "未知"],
-      repoData: [
-        {
-          name: "已熟悉",
-          value: 0,
-        },
-        {
-          name: "已理解",
-          value: 0,
-        },
-        {
-          name: "不理解",
-          value: 0,
-        },
-        {
-          name: "未知",
-          value: 0,
-        },
-      ],
+      repoData: [],
       unitDatas: [],
     };
   },
@@ -62,6 +45,25 @@ export default {
       }
       //若没有，则发送请求
       else {
+        let repoData = [
+        {
+          name: "已熟悉",
+          value: 0,
+        },
+        {
+          name: "已理解",
+          value: 0,
+        },
+        {
+          name: "不理解",
+          value: 0,
+        },
+        {
+          name: "未知",
+          value: 0,
+        },
+      ];
+
         request
           .get("/general/repolevels", {
             params: {
@@ -70,8 +72,8 @@ export default {
           })
           .then((result) => {
             if (result.status === 200) {
-              //更新图表
-              this.repoData = this.repoData.map((item) => {
+              //计算出新的repoData
+              repoData = repoData.map((item) => {
                 //去result.data中找有没有item.name === obj.level的
                 //如果有，将其item.value改为obj.quizCount
                 let sameLevel = result.data.filter((obj) => {
@@ -84,6 +86,8 @@ export default {
                   return item;
                 }
               });
+              //赋给真正的repoData，更新图表
+              this.repoData = repoData;
               //把这条记录放入sessionstorage
               sessionStorage.setItem(newVal,JSON.stringify(this.repoData));
               //请求该题库下的所有题目，借用quicksearch接口

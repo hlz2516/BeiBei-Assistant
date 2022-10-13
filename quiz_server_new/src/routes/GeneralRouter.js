@@ -54,7 +54,10 @@ router.get('/general/week',async (req,res,next)=>{
         now.setMonth(curMonth);
         now.setDate(curDate);
         now.setHours(0);
-        now.setMinutes(1);
+        //选取00:05是因为，考虑到数据量多的情况下sql执行消耗时间较长
+        //另一个点是，rem表执行周期是24小时，每00:01:00开始执行
+        //如果我也选择这个时间点取当天内的背题数，那么会把昨天的背题数也计入，所以需要加几分钟
+        now.setMinutes(5);
         now.setSeconds(0);
 
         const data = [];
@@ -96,7 +99,7 @@ router.get('/general/month',async (req,res,next)=>{
         now.setMonth(curMonth);
         now.setDate(curDate);
         now.setHours(0);
-        now.setMinutes(1);
+        now.setMinutes(5);
         now.setSeconds(0);
         
         const data = [];

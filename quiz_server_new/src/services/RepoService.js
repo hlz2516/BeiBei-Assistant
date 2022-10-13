@@ -8,9 +8,8 @@ async function findAll() {
     const repos = await Repo.findAll();
     if (repos === null) {
       console.error("no repos");
-    } else {
-      return repos;
     }
+    return repos;
   } catch (error) {
     console.log(`findAll err:${error}`);
     throw error;
@@ -22,9 +21,8 @@ async function findById(id) {
     const repo = await Repo.findByPk(id);
     if (repo === null) {
       console.error(`no repo's id is ${id}`);
-    } else {
-      return repo;
     }
+    return repo;
   } catch (error) {
     console.log(`findById err:${error},id:${id}`);
     throw error;
@@ -41,9 +39,8 @@ async function findByName(name,playerId) {
     });
     if (repo === null) {
       console.error(`no repo's name is ${name}`);
-    } else {
-      return repo;
     }
+    return repo;
   } catch (error) {
     console.log(`findByName err:${error},name:${name},playerId:${playerId}`);
     throw error;

@@ -169,6 +169,12 @@ router.get("/quiz/quicksearch", async (req, res, next) => {
     if (key.startsWith("<") && key.endsWith(">")) {
       let repoName = key.substring(1, key.length - 1);
       let repoModel = await repoServ.findByName(repoName,id);
+      if (!repoModel) {
+        return res.json({
+          data:[],
+          status:200
+        })
+      }
       let quizs = await repoServ.getQuizs(repoModel.dataValues);
       quizs = quizs.map(model=>{
         return model.dataValues;
@@ -185,7 +191,9 @@ router.get("/quiz/quicksearch", async (req, res, next) => {
     //如果key是数字，那么会优先认为是一个quiz id
     if (!isNaN(key)) {
       let quiz = await quizServ.findById(Number(key));
-      result.push(quiz.dataValues);
+      if (quiz) {
+         result.push(quiz.dataValues);
+      }
     }
     //在问题或答案中寻找
     let someQuizs = await quizServ.findByQuestionOrAnswer({
@@ -196,16 +204,6 @@ router.get("/quiz/quicksearch", async (req, res, next) => {
       someQuizs.forEach((quiz) => {
         result.push(quiz.dataValues);
       });
-    }
-    //在题库名中查找
-    let repo = await repoServ.findByName(key, id);
-    if (repo) {
-      let quizInRepo = await repoServ.getQuizs(repo.dataValues);
-      if (quizInRepo) {
-        quizInRepo.forEach((quiz) => {
-          result.push(quiz.dataValues);
-        });
-      }
     }
     //如果跟某个标签名相同，则返回该用户所有题库下的有关该标签的所有题目
     let tag = await tagServ.findByName(key);

@@ -25,9 +25,8 @@ async function findById(id) {
     const quiz = await Quiz.findByPk(id);
     if (quiz === null) {
       console.error(`no quiz's id is ${id}`);
-    } else {
-      return quiz;
     }
+    return quiz;
   } catch (error) {
     console.log(`findById err:${error},id:${id}`);
     throw error;
@@ -54,9 +53,8 @@ async function findByQuestionOrAnswer({ question, answer }) {
     });
     if (quizs === null) {
       console.error("no quiz's found");
-    } else {
-      return quizs;
     }
+    return quizs;
   } catch (error) {
     console.log(`find err:${error},question:${question}},answer:${answer}`);
     throw error;
@@ -144,7 +142,7 @@ async function insert(
 }
 
 async function update(
-  { id, question, answer, importance, level, references, remCount },
+  { id, question, answer, importance, level, references },
   repoId,
   tags,
   playerId
@@ -159,10 +157,10 @@ async function update(
     if (!references) {
       references = "";
     }
-
-    if (!remCount) {
-      remCount = 0;
-    }
+    //remCount就是记录该题目背过的次数，不应该受用户主动更新的影响
+    // if (!remCount) {
+    //   remCount = 0;
+    // }
 
     const res = await dbContext.transaction(async (t) => {
       //检查每个tag是否都已存在数据库中，若不存在，则插入
@@ -177,7 +175,7 @@ async function update(
       }
 
       const effects = await Quiz.update(
-        { repoId, question, answer, importance, level, references, remCount },
+        { repoId, question, answer, importance, level, references },
         {
           where: { id },
           transaction: t,

@@ -1,36 +1,33 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-// import Home from '@/views/Home.vue'
-import LoginPage from '../pages/LoginPage.vue';
-import GeneralPage from '../pages/GeneralPage.vue';
-import RepoPage from '../pages/RepoPage.vue';
-import NewQuizPage from '../pages/NewQuizPage.vue';
-import RemQuizPage from '../pages/RemQuizPage.vue';
 
 const routes = [
   {
     path: '/login',
     name: 'login',
-    component: LoginPage
+    //路由懒加载
+    //当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。
+    //通过路由懒加载方式，当路由被访问的时候才加载对应组件，这样就会更加高效。
+    component: ()=>import('@/pages/LoginPage.vue')
   },
   {
     path:'/repo',
     name: 'repo',
-    component:RepoPage
+    component:()=>import('@/pages/RepoPage.vue')
   },
   {
     path:'/newquiz',
     name:'newquiz',
-    component:NewQuizPage
+    component:()=>import('@/pages/NewQuizPage.vue')
   },
   {
     path:'/remquiz',
     name:'remquiz',
-    component:RemQuizPage
+    component:()=>import('@/pages/RemQuizPage.vue')
   },
   {
     path:'/general',
     name:'general',
-    component:GeneralPage
+    component:()=>import('@/pages/GeneralPage.vue')
   }
 ]
 
