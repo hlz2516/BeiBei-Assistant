@@ -116,18 +116,15 @@
       <div class="title">
         <div class="title-info">
           <span class="info-item" style="margin-left: 12px"
-            >#{{ quiz.id || 0 }}</span
-          >
-          <span class="info-item">理解程度:{{ quiz.level || "unknown" }}</span>
-          <span class="info-item"
-            >重要程度:{{ quiz.importance || "unknown" }}</span
-          >
-          <span class="info-item">标签:{{ quiz.tags || "" }}</span>
-          <span class="info-item">还剩{{ quizs.length || 0 }}道</span>
+            >#{{ quiz ? quiz.id : 0 }}</span>
+          <span class="info-item">理解程度:{{ quiz ?  quiz.level : "unknown" }}</span>
+          <span class="info-item">重要程度:{{ quiz ? quiz.importance : "unknown" }}</span>
+          <span class="info-item">标签:{{ quiz ? quiz.tags : "" }}</span>
+          <span class="info-item">还剩{{ quizs.length }}道</span>
         </div>
         <Divider size="small" style="margin: 0" />
         <div class="question">
-          <p>{{ quiz.question || "" }}</p>
+          <p>{{ quiz ? quiz.question : "" }}</p>
         </div>
       </div>
       <Divider size="small" style="margin: 0" />
@@ -135,13 +132,13 @@
         <div class="answer" v-show="show">
           <div
             class="ansdesc-part"
-            v-html="quiz.answer || ''"
+            v-html="quiz ? quiz.answer : ''"
             @click="changeShow"
           ></div>
           <Divider size="small" style="margin: 0" />
           <div class="ref-part">
             参考链接：
-            <span v-html="quiz.references || ''"></span>
+            <span v-html="quiz ? convertToLink(quiz.references) : ''"></span>
           </div>
         </div>
         <div v-show="!show" class="tips" @click="changeShow">
@@ -295,8 +292,8 @@ export default {
         .then((result) => {
           if (result.status === 200) {
             this.show = false;
-            // this.quizs.shift();
-            //把当前index指向的元素删除,当前index不变
+            if(this.quizIndex === this.quizs.length)
+              this.quizIndex--;
             this.quizs.splice(this.quizIndex, 1);
             this[loading] = false;
             if (this.quizs.length === 0) {
@@ -306,6 +303,7 @@ export default {
               this.quizs = [];
               this.prepare = true;
               this.quizSelector.data = [];
+              this.quizIndex = 0;
             }
           }
         })
@@ -374,6 +372,7 @@ export default {
       this.quizs = [];
       this.prepare = true;
       this.quizSelector.data = [];
+      this.quizIndex = 0;
     },
     radioChanged(value) {
       if (value === "目标模式") {
@@ -405,6 +404,34 @@ export default {
         }
       }
     },
+    convertToLink(references){
+      if(!references)
+        return '';
+      let refs = references.split(",");
+      let htmlLinks = refs
+        .map((ref) => {
+          if (ref == "") {
+            return "";
+          }
+          console.log('ref',ref);
+          let regex1 = /\[(.+?)\]/;
+          let regex2 = /\((.+?)\)/;
+          let title = '未知标题';
+          let link = '';
+          if(regex1.test(ref)){
+            title = ref.match(regex1)[0];
+            title = title.substring(1, title.length - 1);
+          }
+          if(regex2.test(ref)){
+            link = ref.match(regex2)[0];
+            link = link.substring(1, link.length - 1);
+          }
+
+          return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
+        })
+        .join(";");
+      return htmlLinks;
+    }
   },
 
   computed: {
@@ -421,34 +448,6 @@ export default {
       if (this.quizs[index].tags instanceof Array) {
         this.quizs[index].tags = this.quizs[index].tags.join(",");
       }
-
-      //链接处理
-      //原链接格式如：[标题](链接地址),[..](..)
-      if (!this.quizs[index].references) {
-        this.quizs[index].references = "";
-      }
-      //如果链接里包含</len;>说明已经被转换过，故跳过
-      if (this.quizs[index].references.indexOf('</a>') > -1) {
-        return this.quizs[index];
-      }
-      let refs = this.quizs[index].references.split(",");
-      let htmlLinks = refs
-        .map((ref) => {
-          if (ref == "") {
-            return "";
-          }
-          let regex1 = /\[(.+?)\]/;
-          let regex2 = /\((.+?)\)/;
-          let title = ref.match(regex1)[0];
-          title = title.substring(1, title.length - 1);
-
-          let link = ref.match(regex2)[0];
-          link = link.substring(1, link.length - 1);
-
-          return `<a href=${'"' + link + '"'} target='_blank'>${title}</a>`;
-        })
-        .join(";");
-      this.quizs[index].references = htmlLinks;
 
       return this.quizs[index];
     },

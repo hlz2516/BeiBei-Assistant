@@ -51,13 +51,14 @@ CREATE
 		declare done int default 0;
 		declare tags json default '[]';
 		declare player_id int;
+        declare _desc varchar(200);
 		declare player_name varchar(16);
 		declare cur_quiz cursor for select `id`,`question`,`answer`,`importance` from quiz where `repoId` = repo_id and destroy_time is null;
 		declare continue handler for not found set done = 1;
 
-		select `name`,`playerId` into repo_name,player_id from repo where `id` = repo_id;
+		select `name`,`playerId`,`desc` into repo_name,player_id,_desc from repo where `id` = repo_id;
 		select `name` into player_name from player where id = player_id;
-		insert into pub_repo(`code`,`name`,`creator`) values(code,repo_name,player_name);
+		insert into pub_repo(`code`,`name`,`creator`,`desc`) values(code,repo_name,player_name,_desc);
 		-- 循环游标，每次取出一个quiz，就赋予q,a,i三个变量，并去tagquizs表寻找对应的tag，封装成tags，最后插入到pub_quiz表
 		open cur_quiz;
 		flag:loop
@@ -134,6 +135,7 @@ create procedure `interview_dev`.`download`(in player_id int,in _code char(6))
         -- 在pub_repo中找到对应code的题库，并插入到用户的题库中
         declare repo_name varchar(32);
         declare repo_id int default 0;
+        declare _desc varchar(200);
         declare q varchar(128);
         declare a varchar(2048);
         declare i char(16);
@@ -145,14 +147,14 @@ create procedure `interview_dev`.`download`(in player_id int,in _code char(6))
         declare cur_quiz cursor for select question,answer,importance,tags from pub_quiz where `code` = _code;
         declare continue handler for not found set done = 1;
         
-        select `name` into repo_name from pub_repo where `code` = _code;
+        select `name`,`desc` into repo_name,_desc from pub_repo where `code` = _code;
 		-- 检查该用户的题库中是否存在同名的题库，若存在，则在要插入的题库后添加后缀*
 		select count(*) into ifdup from repo where playerId = player_id and `name` = repo_name and destroy_time is null limit 1;
 		select ifdup;
 		if ifdup > 0 then
 			select CONCAT(repo_name,'*') into repo_name;
 		end if;
-        insert into repo(playerId,`name`,origin) values(player_id,repo_name,_code); 
+        insert into repo(playerId,`name`,origin,`desc`) values(player_id,repo_name,_code,_desc); 
         select id into repo_id from repo where `playerId` = player_id and `name` = repo_name and destroy_time is null;
 
         open cur_quiz;

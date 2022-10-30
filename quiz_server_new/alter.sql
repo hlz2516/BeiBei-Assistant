@@ -11,3 +11,5 @@ create table remember_record(
     quizId bigint not null references quiz(id),
     record_time Timestamp not null
 );
+
+alter table pub_repo add `desc` varchar(200) default '';

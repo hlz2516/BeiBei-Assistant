@@ -30,6 +30,10 @@ export default {
       type: String,
       default: "100%",
     },
+    size:{
+      type:Array,
+      default:[]
+    }
   },
   mounted() {
     echarts.registerTheme("walden", themeObj.theme);
@@ -53,6 +57,9 @@ export default {
         radius: this.radius,
       },
     });
+    window.onresize = ()=>{
+      this.chart.resize();
+    }
   },
   unmounted() {
     echarts.dispose(this.chart);
@@ -68,6 +75,16 @@ export default {
         },
       });
     },
+    size(newVal){
+      if (newVal instanceof Array) {
+        if (newVal.length === 2){
+          this.chart.resize({
+            width:newVal[0],
+            height:newVal[1]
+          })
+        }
+      }
+    }
   },
 };
 </script>

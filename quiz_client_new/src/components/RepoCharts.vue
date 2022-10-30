@@ -1,9 +1,14 @@
 <template>
   <div class="charts">
-    <div class="repo-pie">
-      <PieChart radius="60%" :category="category" :datas="repoData" />
+    <div class="repo-pie" ref="pie">
+      <PieChart
+        radius="60%"
+        :category="category"
+        :datas="repoData"
+        :size="pieSize"
+      />
     </div>
-    <div class="repo-detail">
+    <div class="repo-detail" v-show="repo">
       <UnitChart
         :datas="unitDatas"
         :UnitOnClick="toNewQuiz"
@@ -30,6 +35,7 @@ export default {
       category: ["已熟悉", "已理解", "不理解", "未知"],
       repoData: [],
       unitDatas: [],
+      pieSize: [],
     };
   },
   props: ["repo"],
@@ -40,29 +46,29 @@ export default {
       //若有，则直接取饼图的数据和明细数据
       if (data) {
         this.repoData = JSON.parse(data);
-        let unitDatas = sessionStorage.getItem(newVal + '*');
+        let unitDatas = sessionStorage.getItem(newVal + "*");
         this.unitDatas = JSON.parse(unitDatas);
       }
       //若没有，则发送请求
       else {
         let repoData = [
-        {
-          name: "已熟悉",
-          value: 0,
-        },
-        {
-          name: "已理解",
-          value: 0,
-        },
-        {
-          name: "不理解",
-          value: 0,
-        },
-        {
-          name: "未知",
-          value: 0,
-        },
-      ];
+          {
+            name: "已熟悉",
+            value: 0,
+          },
+          {
+            name: "已理解",
+            value: 0,
+          },
+          {
+            name: "不理解",
+            value: 0,
+          },
+          {
+            name: "未知",
+            value: 0,
+          },
+        ];
 
         request
           .get("/general/repolevels", {
@@ -89,26 +95,32 @@ export default {
               //赋给真正的repoData，更新图表
               this.repoData = repoData;
               //把这条记录放入sessionstorage
-              sessionStorage.setItem(newVal,JSON.stringify(this.repoData));
+              sessionStorage.setItem(newVal, JSON.stringify(this.repoData));
               //请求该题库下的所有题目，借用quicksearch接口
-              return request.get('/quiz/quicksearch',{
-                params:{
-                    key:`<${newVal}>`
-                }
-              })
+              return request.get("/quiz/quicksearch", {
+                params: {
+                  key: `<${newVal}>`,
+                },
+              });
             }
           })
-          .then(result=>{
+          .then((result) => {
             if (result.status === 200) {
-                this.unitDatas = result.data;
-                //记录入sessionstorage
-                sessionStorage.setItem(newVal + '*',JSON.stringify(result.data));
+              this.unitDatas = result.data;
+              //记录入sessionstorage
+              sessionStorage.setItem(newVal + "*", JSON.stringify(result.data));
             }
           })
-          .catch(err=>{
+          .catch((err) => {
             console.error(err);
           });
       }
+
+      this.$nextTick(() => {
+        let w = parseInt(window.getComputedStyle(this.$refs.pie)["width"], 10);
+        let h = parseInt(window.getComputedStyle(this.$refs.pie)["height"], 10);
+        this.pieSize = [w, h];
+      });
     },
   },
   methods: {

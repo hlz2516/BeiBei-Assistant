@@ -88,6 +88,10 @@ export default {
   },
   methods: {
     addComment() {
+        if (!this.content || this.content == '') {
+          return;
+        }
+
         request.post('/comment/add',{
             code:this.repoCode,
             comment:this.content

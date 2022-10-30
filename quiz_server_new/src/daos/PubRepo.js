@@ -32,6 +32,10 @@ const PubRepo = dbContext.define('PubRepo',{
     create_time:{
         type:DataTypes.DATE,
         allowNull:false
+    },
+    desc:{
+        type:DataTypes.STRING(200),
+        defaultValue:''
     }
 },
 {

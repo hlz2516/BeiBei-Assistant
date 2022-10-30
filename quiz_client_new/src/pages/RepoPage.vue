@@ -163,6 +163,7 @@ export default {
         columns: [
           { title: "题库", key: "name" },
           { title: "创作者", key: "creator" },
+          { title: "描述", key: "desc", tooltip:true },
           { title: "共享密码", key: "code" },
           { title: "题目数量", key: "quiz_count" },
           { title: "下载次数", key: "download_time", sortable: true },

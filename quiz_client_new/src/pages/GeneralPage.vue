@@ -45,7 +45,7 @@
           </DropdownMenu>
         </template>
       </Dropdown>
-      <repo-charts :repo="curRepo" />
+      <repo-charts v-show="curRepo!=''" :repo="curRepo" />
     </TabPane>
   </Tabs>
 </template>
